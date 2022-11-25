@@ -18,25 +18,19 @@ type AccountController struct {
 func (receiver AccountController) Create(c *gin.Context) {
 	var req request.CreateAccount
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if !util.IsValidUUID(req.UserID) {
-		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid user id",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return
 	}
 
 	var limit int
 	var ok bool
 	if limit, ok = util.AccountTypesLimit[req.Type]; !ok {
-		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid account type. Supported options are: 'checking', 'saving'",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid account type. Supported options are: 'checking', 'saving'"})
 		return
 	}
 
@@ -48,5 +42,5 @@ func (receiver AccountController) Create(c *gin.Context) {
 		OpenDate: time.Now(),
 		Type:     req.Type,
 	}
-	c.IndentedJSON(http.StatusCreated, bankAccount)
+	c.JSON(http.StatusCreated, bankAccount)
 }
