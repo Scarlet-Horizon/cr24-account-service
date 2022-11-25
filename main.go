@@ -2,16 +2,20 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/google/uuid"
+	"github.com/gin-gonic/gin"
 	"log"
+	"main/controller"
 	"main/db"
 	"main/env"
-	"main/model"
+	"main/util"
 	"math/rand"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -28,20 +32,44 @@ func main() {
 		log.Fatalf("failed to load SDK config, %v", err)
 	}
 
-	acc := db.AccountDB{
-		Client: dynamodb.NewFromConfig(cfg),
+	accountController := controller.AccountController{
+		DB: &db.AccountDB{
+			Client: dynamodb.NewFromConfig(cfg),
+		},
 	}
 
-	bankAccount := model.Account{
-		PK:       "USER#4545",
-		SK:       "ACCOUNT#" + uuid.NewString(),
-		Amount:   100.52,
-		Limit:    50,
-		OpenDate: time.Now(),
-		Type:     "main",
+	router := gin.Default()
+	api := router.Group("api/v1/")
+	{
+		api.POST("/account", accountController.Create)
 	}
-	err = acc.Create(bankAccount)
 
-	//err = acc.Create(util.RandomAccount())
-	fmt.Println(err)
+	srv := &http.Server{
+		Addr:         ":8080",
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      router,
+	}
+
+	go func() {
+		log.Println("server is up at: " + srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("ListenAndServe() error: %s\n", err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
+	<-c
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		util.Log("Shutdown() error", err)
+	}
+
+	log.Println("shutting down")
+	os.Exit(0)
 }
