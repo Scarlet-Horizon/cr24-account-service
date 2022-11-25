@@ -17,11 +17,18 @@ type AccountController struct {
 
 func (receiver AccountController) Create(c *gin.Context) {
 	var req request.CreateAccount
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
 			"error": err.Error(),
 		})
+		return
+	}
+
+	if !util.IsValidUUID(req.UserID) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid user id",
+		})
+		return
 	}
 
 	var limit int
@@ -30,6 +37,7 @@ func (receiver AccountController) Create(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid account type. Supported options are: 'checking', 'saving'",
 		})
+		return
 	}
 
 	bankAccount := model.Account{

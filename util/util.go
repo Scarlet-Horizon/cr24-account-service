@@ -1,6 +1,9 @@
 package util
 
-import "log"
+import (
+	"github.com/google/uuid"
+	"log"
+)
 
 const TableName = "Account"
 
@@ -12,4 +15,9 @@ var AccountTypesLimit = map[string]int{
 func Log(message string, err error) {
 	log.Println(message)
 	log.Println(err)
+}
+
+func IsValidUUID(u string) bool {
+	_, err := uuid.Parse(u)
+	return err == nil
 }
