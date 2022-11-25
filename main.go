@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/google/uuid"
 	"log"
 	"main/db"
 	"main/env"
-	"main/util"
+	"main/model"
 	"math/rand"
 	"os"
 	"time"
@@ -31,6 +32,16 @@ func main() {
 		Client: dynamodb.NewFromConfig(cfg),
 	}
 
-	err = acc.Create(util.RandomAccount())
+	bankAccount := model.Account{
+		PK:       "USER#4545",
+		SK:       "ACCOUNT#" + uuid.NewString(),
+		Amount:   100.52,
+		Limit:    50,
+		OpenDate: time.Now(),
+		Type:     "main",
+	}
+	err = acc.Create(bankAccount)
+
+	//err = acc.Create(util.RandomAccount())
 	fmt.Println(err)
 }

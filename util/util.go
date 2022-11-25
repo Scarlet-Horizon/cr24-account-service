@@ -12,6 +12,7 @@ const dateMax = 1668952800
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const minAmount = 100.0
 const maxAmount = 10000.0
+const TableName = "Account"
 
 func RandomAccount() model.Account {
 	//pk := "USER#" + uuid.NewString()
