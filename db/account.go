@@ -21,6 +21,11 @@ func (receiver AccountDB) Create(account model.Account) error {
 		return err
 	}
 
+	_, err = receiver.getAllWithFilter(account.PK, account.Type)
+	if err != nil {
+		return err
+	}
+
 	accInput := &dynamodb.PutItemInput{
 		Item:      accItem,
 		TableName: aws.String(util.TableName),
@@ -33,13 +38,44 @@ func (receiver AccountDB) Create(account model.Account) error {
 	return err
 }
 
-func (receiver AccountDB) GetAll(id string) ([]model.Account, error) {
+func getKeyConAndFilter(id string, t string) (expression.KeyConditionBuilder, expression.ConditionBuilder) {
 	keyCond := expression.KeyAnd(
 		expression.Key("PK").Equal(expression.Value(util.GetPK(id))),
 		expression.Key("SK").BeginsWith("ACCOUNT#"),
 	)
+	filter := expression.Name("Type").Equal(expression.Value(t))
+	return keyCond, filter
+}
 
-	expr, err := expression.NewBuilder().WithKeyCondition(keyCond).Build()
+func (receiver AccountDB) getAllWithFilter(id string, t string) (model.Account, error) {
+	keyCond, filter := getKeyConAndFilter(id, t)
+	accounts, err := receiver.getAll(keyCond, filter, true)
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	if len(accounts) == 0 {
+		return model.Account{}, nil
+	}
+	return model.Account{}, util.AlreadyExists
+}
+
+func (receiver AccountDB) GetAll(id string) ([]model.Account, error) {
+	keyCond, _ := getKeyConAndFilter(id, "")
+	return receiver.getAll(keyCond, expression.ConditionBuilder{}, false)
+}
+
+func (receiver AccountDB) getAll(keyCond expression.KeyConditionBuilder, filter expression.ConditionBuilder,
+	isFilter bool) ([]model.Account, error) {
+
+	var expr expression.Expression
+	var err error
+	if isFilter {
+		expr, err = expression.NewBuilder().WithKeyCondition(keyCond).WithFilter(filter).Build()
+	} else {
+		expr, err = expression.NewBuilder().WithKeyCondition(keyCond).Build()
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +85,9 @@ func (receiver AccountDB) GetAll(id string) ([]model.Account, error) {
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		KeyConditionExpression:    expr.KeyCondition(),
+	}
+	if isFilter {
+		input.FilterExpression = expr.Filter()
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

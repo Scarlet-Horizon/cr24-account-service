@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"main/db"
@@ -45,6 +46,10 @@ func (receiver AccountController) Create(c *gin.Context) {
 
 	err := receiver.DB.Create(bankAccount)
 	if err != nil {
+		if errors.Is(err, util.AlreadyExists) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

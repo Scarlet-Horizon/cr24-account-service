@@ -1,11 +1,15 @@
 package util
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"log"
+	"strings"
 )
 
 const TableName = "Account"
+
+var AlreadyExists = errors.New("account with this type already exists")
 
 var AccountTypesLimit = map[string]int{
 	"checking": 50,
@@ -23,9 +27,15 @@ func IsValidUUID(u string) bool {
 }
 
 func GetPK(id string) string {
+	if strings.Contains(id, "USER#") {
+		return id
+	}
 	return "USER#" + id
 }
 
 func GetSK(id string) string {
+	if strings.Contains(id, "ACCOUNT#") {
+		return id
+	}
 	return "ACCOUNT#" + id
 }
