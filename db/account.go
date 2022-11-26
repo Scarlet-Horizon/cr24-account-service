@@ -108,3 +108,36 @@ func (receiver AccountDB) getAll(keyCond expression.KeyConditionBuilder, filter 
 	}
 	return accounts, nil
 }
+
+func (receiver AccountDB) Deposit(account model.Account, deposit float64) error {
+	primaryKey := map[string]string{
+		"PK": util.GetPK(account.PK),
+		"SK": util.GetSK(account.SK),
+	}
+
+	pk, err := attributevalue.MarshalMap(primaryKey)
+	if err != nil {
+		return err
+	}
+
+	upd := expression.Set(expression.Name("Amount"), expression.Plus(expression.Name("Amount"),
+		expression.Value(deposit)))
+	expr, err := expression.NewBuilder().WithUpdate(upd).Build()
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.UpdateItemInput{
+		Key:                       pk,
+		TableName:                 aws.String(util.TableName),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		UpdateExpression:          expr.Update(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err = receiver.Client.UpdateItem(ctx, input)
+	return err
+}
