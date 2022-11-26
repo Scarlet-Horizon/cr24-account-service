@@ -6,9 +6,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"log"
 	"main/controller"
 	"main/db"
+	_ "main/docs"
 	"main/env"
 	"main/util"
 	"math/rand"
@@ -19,6 +22,23 @@ import (
 	"time"
 )
 
+//	@title			cr24 Account API
+//	@version		1.0
+//	@description	API for account management for cr24 project
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	David Slatinek
+//	@contact.url	https://github.com/david-slatinek
+
+//	@accept		json
+//	@produce	json
+//	@schemes	http
+
+//	@license.name	GNU General Public License v3.0
+//	@license.url	https://www.gnu.org/licenses/gpl-3.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -44,6 +64,8 @@ func main() {
 		api.POST("/account", accountController.Create)
 		api.GET("/accounts/:userID", accountController.GetAll)
 	}
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{
 		Addr:         ":8080",
