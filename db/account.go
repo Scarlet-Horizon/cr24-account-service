@@ -109,7 +109,39 @@ func (receiver AccountDB) getAll(keyCond expression.KeyConditionBuilder, filter 
 	return accounts, nil
 }
 
-func (receiver AccountDB) Deposit(account model.Account, deposit float64) error {
+func (receiver AccountDB) getAccount(account model.Account) (model.Account, error) {
+	primaryKey := map[string]string{
+		"PK": util.GetPK(account.PK),
+		"SK": util.GetSK(account.SK),
+	}
+
+	pk, err := attributevalue.MarshalMap(primaryKey)
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	input := &dynamodb.GetItemInput{
+		Key:            pk,
+		TableName:      aws.String(util.TableName),
+		ConsistentRead: aws.Bool(true),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	result, err := receiver.Client.GetItem(ctx, input)
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	var acc model.Account
+	if err := attributevalue.UnmarshalMap(result.Item, &acc); err != nil {
+		return model.Account{}, err
+	}
+	return acc, nil
+}
+
+func (receiver AccountDB) depositWithdraw(account model.Account, amount float64, deposit bool) error {
 	primaryKey := map[string]string{
 		"PK": util.GetPK(account.PK),
 		"SK": util.GetSK(account.SK),
@@ -120,9 +152,27 @@ func (receiver AccountDB) Deposit(account model.Account, deposit float64) error 
 		return err
 	}
 
-	upd := expression.Set(expression.Name("Amount"), expression.Plus(expression.Name("Amount"),
-		expression.Value(deposit)))
-	expr, err := expression.NewBuilder().WithUpdate(upd).Build()
+	var upd expression.UpdateBuilder
+	var expr expression.Expression
+
+	if deposit {
+		upd = expression.Set(expression.Name("Amount"), expression.Plus(expression.Name("Amount"),
+			expression.Value(amount)))
+	} else {
+		acc, er := receiver.getAccount(account)
+		if er != nil {
+			return er
+		}
+
+		if acc.Amount-amount < float64(-1*acc.Limit) {
+			return util.InsufficientFounds
+		}
+
+		upd = expression.Set(expression.Name("Amount"), expression.Minus(expression.Name("Amount"),
+			expression.Value(amount)))
+	}
+	expr, err = expression.NewBuilder().WithUpdate(upd).Build()
+
 	if err != nil {
 		return err
 	}
@@ -140,4 +190,13 @@ func (receiver AccountDB) Deposit(account model.Account, deposit float64) error 
 
 	_, err = receiver.Client.UpdateItem(ctx, input)
 	return err
+
+}
+
+func (receiver AccountDB) Deposit(account model.Account, amount float64) error {
+	return receiver.depositWithdraw(account, amount, true)
+}
+
+func (receiver AccountDB) Withdraw(account model.Account, amount float64) error {
+	return receiver.depositWithdraw(account, amount, false)
 }

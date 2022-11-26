@@ -10,6 +10,7 @@ import (
 const TableName = "Account"
 
 var AlreadyExists = errors.New("account with this type already exists")
+var InsufficientFounds = errors.New("insufficient funds")
 
 var AccountTypesLimit = map[string]int{
 	"checking": 50,
