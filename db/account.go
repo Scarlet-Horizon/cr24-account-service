@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"main/model"
 	"main/util"
 	"time"
@@ -16,21 +16,56 @@ type AccountDB struct {
 }
 
 func (receiver AccountDB) Create(account model.Account) error {
-	input := &dynamodb.PutItemInput{
-		Item: map[string]types.AttributeValue{
-			"PK":       &types.AttributeValueMemberS{Value: account.PK},
-			"SK":       &types.AttributeValueMemberS{Value: account.SK},
-			"Amount":   &types.AttributeValueMemberN{Value: fmt.Sprintf("%.2f", account.Amount)},
-			"Limit":    &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", account.Limit)},
-			"OpenDate": &types.AttributeValueMemberS{Value: account.OpenDate.Format("2006-01-02")},
-			"Type":     &types.AttributeValueMemberS{Value: account.Type},
-		},
+	accItem, err := attributevalue.MarshalMap(account)
+	if err != nil {
+		return err
+	}
+
+	accInput := &dynamodb.PutItemInput{
+		Item:      accItem,
 		TableName: aws.String(util.TableName),
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := receiver.Client.PutItem(ctx, input)
+	_, err = receiver.Client.PutItem(ctx, accInput)
 	return err
+}
+
+func (receiver AccountDB) GetAll(id string) ([]model.Account, error) {
+	keyCond := expression.KeyAnd(
+		expression.Key("PK").Equal(expression.Value(util.GetPK(id))),
+		expression.Key("SK").BeginsWith("ACCOUNT#"),
+	)
+
+	expr, err := expression.NewBuilder().WithKeyCondition(keyCond).Build()
+	if err != nil {
+		return nil, err
+	}
+
+	input := &dynamodb.QueryInput{
+		TableName:                 aws.String(util.TableName),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	result, err := receiver.Client.Query(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result.Items) == 0 {
+		return nil, nil
+	}
+
+	var accounts []model.Account
+	if err := attributevalue.UnmarshalListOfMaps(result.Items, &accounts); err != nil {
+		return nil, err
+	}
+	return accounts, nil
 }
