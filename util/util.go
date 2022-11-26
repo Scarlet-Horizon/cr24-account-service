@@ -21,3 +21,11 @@ func IsValidUUID(u string) bool {
 	_, err := uuid.Parse(u)
 	return err == nil
 }
+
+func GetPK(id string) string {
+	return "USER#" + id
+}
+
+func GetSK(id string) string {
+	return "ACCOUNT#" + id
+}
