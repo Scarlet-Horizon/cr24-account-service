@@ -1,6 +1,6 @@
 package request
 
 type CreateAccount struct {
-	UserID string `json:"userID"`
-	Type   string `json:"type"`
+	UserID string `json:"userID" binding:"required,uuid"`
+	Type   string `json:"type" binding:"required"`
 }

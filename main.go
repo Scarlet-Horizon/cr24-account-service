@@ -39,7 +39,7 @@ func main() {
 	}
 
 	router := gin.Default()
-	api := router.Group("api/v1/")
+	api := router.Group("api/v1")
 	{
 		api.POST("/account", accountController.Create)
 	}

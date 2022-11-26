@@ -36,11 +36,17 @@ func (receiver AccountController) Create(c *gin.Context) {
 
 	bankAccount := model.Account{
 		PK:       req.UserID,
-		SK:       "ACCOUNT#" + uuid.NewString(),
+		SK:       uuid.NewString(),
 		Amount:   0,
 		Limit:    limit,
 		OpenDate: time.Now(),
 		Type:     req.Type,
+	}
+
+	err := receiver.DB.Create(bankAccount)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusCreated, bankAccount)
 }
