@@ -42,6 +42,7 @@ func main() {
 	api := router.Group("api/v1")
 	{
 		api.POST("/account", accountController.Create)
+		api.GET("/accounts/:userID", accountController.GetAll)
 	}
 
 	srv := &http.Server{

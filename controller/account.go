@@ -35,8 +35,8 @@ func (receiver AccountController) Create(c *gin.Context) {
 	}
 
 	bankAccount := model.Account{
-		PK:       req.UserID,
-		SK:       uuid.NewString(),
+		PK:       util.GetPK(req.UserID),
+		SK:       util.GetSK(uuid.NewString()),
 		Amount:   0,
 		Limit:    limit,
 		OpenDate: time.Now(),
@@ -49,4 +49,25 @@ func (receiver AccountController) Create(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, bankAccount)
+}
+
+func (receiver AccountController) GetAll(c *gin.Context) {
+	userID := c.Param("userID")
+
+	if !util.IsValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
+
+	acc, err := receiver.DB.GetAll(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(acc) == 0 {
+		c.Status(http.StatusNoContent)
+		return
+	}
+	c.JSON(http.StatusOK, acc)
 }
