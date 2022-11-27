@@ -97,6 +97,54 @@ func (receiver AccountController) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, acc)
 }
 
+func (receiver AccountController) depositWithdraw(c *gin.Context, deposit bool) {
+	accountID := c.Param("accountID")
+	if !util.IsValidUUID(accountID) {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		return
+	}
+
+	var req request.MonetaryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if !util.IsValidUUID(req.UserID) {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid user id"})
+		return
+	}
+
+	if req.Amount < 1 {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid amount, minimum is 1"})
+		return
+	}
+
+	bankAccount := model.Account{
+		PK: util.GetPK(req.UserID),
+		SK: util.GetSK(accountID),
+	}
+
+	if deposit {
+		err := receiver.DB.Deposit(bankAccount, req.Amount)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+			return
+		}
+	} else {
+		err := receiver.DB.Withdraw(bankAccount, req.Amount)
+		if err != nil {
+			if errors.Is(err, util.InsufficientFounds) {
+				c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+			return
+		}
+	}
+	c.Status(http.StatusNoContent)
+}
+
 //	@description	Deposit money to a specific account.
 //	@summary		Deposit money to a specific account
 //	@tags			account
@@ -107,69 +155,18 @@ func (receiver AccountController) GetAll(c *gin.Context) {
 //	@failure		500			{object}	response.ErrorResponse
 //	@router			/account/{accountID}/deposit [PATCH]
 func (receiver AccountController) Deposit(c *gin.Context) {
-	accountID := c.Param("accountID")
-
-	if !util.IsValidUUID(accountID) {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
-		return
-	}
-
-	var req request.MonetaryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	if req.Amount < 1 {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid amount, minimum is 1"})
-		return
-	}
-
-	bankAccount := model.Account{
-		PK: util.GetPK(req.UserID),
-		SK: util.GetSK(accountID),
-	}
-
-	err := receiver.DB.Deposit(bankAccount, req.Amount)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-	c.Status(http.StatusNoContent)
+	receiver.depositWithdraw(c, true)
 }
 
+//	@description	Withdraw money from a specific account.
+//	@summary		Withdraw money from a specific account
+//	@tags			account
+//	@param			accountID	path	string					true	"Account ID"
+//	@param			requestBody	body	request.MonetaryRequest	true	"User ID and amount to deposit"
+//	@success		204			"No Content"
+//	@failure		400			{object}	response.ErrorResponse
+//	@failure		500			{object}	response.ErrorResponse
+//	@router			/account/{accountID}/withdraw [PATCH]
 func (receiver AccountController) Withdraw(c *gin.Context) {
-	accountID := c.Param("accountID")
-
-	if !util.IsValidUUID(accountID) {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
-		return
-	}
-
-	var req request.MonetaryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	if req.Amount < 1 {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid amount, minimum is 1"})
-		return
-	}
-
-	bankAccount := model.Account{
-		PK: util.GetPK(req.UserID),
-		SK: util.GetSK(accountID),
-	}
-
-	err := receiver.DB.Withdraw(bankAccount, req.Amount)
-	if err != nil {
-		if errors.Is(err, util.InsufficientFounds) {
-			c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-	c.Status(http.StatusNoContent)
+	receiver.depositWithdraw(c, false)
 }
