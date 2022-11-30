@@ -58,6 +58,8 @@ func main() {
 		},
 	}
 
+	gin.SetMode(os.Getenv("GIN_MODE"))
+
 	router := gin.Default()
 	api := router.Group("api/v1")
 	{
