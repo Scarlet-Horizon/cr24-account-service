@@ -171,6 +171,15 @@ func (receiver AccountController) Withdraw(context *gin.Context) {
 	receiver.depositWithdraw(context, false)
 }
 
+//	@description	Close a specific account.
+//	@summary		Close a specific account
+//	@tags			account
+//	@param			accountID	path	string					true	"Account ID"
+//	@param			requestBody	body	request.CloseRequest	true	"User ID"
+//	@success		204			"No Content"
+//	@failure		400			{object}	response.ErrorResponse
+//	@failure		500			{object}	response.ErrorResponse
+//	@router			/account/{accountID}/close [PATCH]
 func (receiver AccountController) Close(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
