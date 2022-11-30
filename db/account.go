@@ -217,10 +217,8 @@ func (receiver AccountDB) Close(account model.Account) error {
 		return errors.New("invalid account")
 	}
 
-	if acc.CloseDate != nil {
-		if !acc.CloseDate.IsZero() {
-			return errors.New("invalid account")
-		}
+	if acc.CloseDate != nil && !acc.CloseDate.IsZero() {
+		return errors.New("account is already closed")
 	}
 
 	upd := expression.Set(expression.Name("CloseDate"), expression.Value(time.Now().Unix()))
