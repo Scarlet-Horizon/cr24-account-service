@@ -153,6 +153,17 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 		return err
 	}
 
+	acc, err := receiver.getAccount(account)
+	if err != nil || acc.PK == "" {
+		return errors.New("invalid account")
+	}
+
+	if acc.CloseDate != nil && !acc.CloseDate.IsZero() {
+		return errors.New("account is closed")
+	}
+
+	cond := expression.Name("CloseDate").AttributeNotExists()
+
 	var upd expression.UpdateBuilder
 	var expr expression.Expression
 
@@ -172,7 +183,7 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 		upd = expression.Set(expression.Name("Amount"), expression.Minus(expression.Name("Amount"),
 			expression.Value(amount)))
 	}
-	expr, err = expression.NewBuilder().WithUpdate(upd).Build()
+	expr, err = expression.NewBuilder().WithUpdate(upd).WithCondition(cond).Build()
 
 	if err != nil {
 		return err
@@ -181,6 +192,7 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 	input := &dynamodb.UpdateItemInput{
 		Key:                       pk,
 		TableName:                 aws.String(util.TableName),
+		ConditionExpression:       expr.Condition(),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		UpdateExpression:          expr.Update(),
