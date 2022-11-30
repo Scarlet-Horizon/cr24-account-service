@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -190,7 +191,6 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 
 	_, err = receiver.Client.UpdateItem(ctx, input)
 	return err
-
 }
 
 func (receiver AccountDB) Deposit(account model.Account, amount float64) error {
@@ -199,4 +199,51 @@ func (receiver AccountDB) Deposit(account model.Account, amount float64) error {
 
 func (receiver AccountDB) Withdraw(account model.Account, amount float64) error {
 	return receiver.depositWithdraw(account, amount, false)
+}
+
+func (receiver AccountDB) Close(account model.Account) error {
+	primaryKey := map[string]string{
+		"PK": util.GetPK(account.PK),
+		"SK": util.GetSK(account.SK),
+	}
+
+	pk, err := attributevalue.MarshalMap(primaryKey)
+	if err != nil {
+		return err
+	}
+
+	acc, err := receiver.getAccount(account)
+	if err != nil || acc.PK == "" {
+		return errors.New("invalid account")
+	}
+
+	if acc.CloseDate != nil {
+		if !acc.CloseDate.IsZero() {
+			return errors.New("invalid account")
+		}
+	}
+
+	upd := expression.Set(expression.Name("CloseDate"), expression.Value(time.Now().Unix()))
+	cond := expression.Name("CloseDate").AttributeNotExists()
+	cond2 := expression.Name("PK").Equal(expression.Value(util.GetPK(account.PK)))
+
+	expr, err := expression.NewBuilder().WithUpdate(upd).WithCondition(cond).WithCondition(cond2).Build()
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.UpdateItemInput{
+		Key:                       pk,
+		TableName:                 aws.String(util.TableName),
+		ConditionExpression:       expr.Condition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		UpdateExpression:          expr.Update(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err = receiver.Client.UpdateItem(ctx, input)
+	return err
 }
