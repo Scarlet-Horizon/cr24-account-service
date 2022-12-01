@@ -257,3 +257,44 @@ func (receiver AccountDB) Close(account model.Account) error {
 	_, err = receiver.Client.UpdateItem(ctx, input)
 	return err
 }
+
+func (receiver AccountDB) Delete(account model.Account) error {
+	primaryKey := map[string]string{
+		"PK": util.GetPK(account.PK),
+		"SK": util.GetSK(account.SK),
+	}
+
+	pk, err := attributevalue.MarshalMap(primaryKey)
+	if err != nil {
+		return err
+	}
+
+	acc, err := receiver.getAccount(account)
+	if err != nil || acc.PK == "" {
+		return util.InvalidAccount
+	}
+
+	if acc.CloseDate == nil {
+		return util.OpenAccount
+	}
+
+	cond := expression.Name("CloseDate").AttributeExists()
+	expr, err := expression.NewBuilder().WithCondition(cond).Build()
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.DeleteItemInput{
+		Key:                       pk,
+		TableName:                 aws.String(util.TableName),
+		ConditionExpression:       expr.Condition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err = receiver.Client.DeleteItem(ctx, input)
+	return err
+}

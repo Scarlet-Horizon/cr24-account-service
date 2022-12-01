@@ -68,6 +68,7 @@ func main() {
 		api.PATCH("/account/:accountID/deposit", accountController.Deposit)
 		api.PATCH("/account/:accountID/withdraw", accountController.Withdraw)
 		api.PATCH("/account/:accountID/close", accountController.Close)
+		api.DELETE("/account/:accountID", accountController.Delete)
 	}
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

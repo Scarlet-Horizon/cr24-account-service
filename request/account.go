@@ -1,9 +1,11 @@
 package request
 
+//	@description	User request
+//	@description	with user id
 type User struct {
 	// User ID
 	UserID string `json:"userID" binding:"required,uuid" example:"425129d3-72b3-4c64-8556-fe7da1889981"`
-}
+} //	@name	User
 
 //	@description	AccountRequest request
 //	@description	with user id and account type

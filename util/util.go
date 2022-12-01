@@ -11,6 +11,8 @@ const TableName = "Account"
 
 var AlreadyExists = errors.New("account with this type already exists")
 var InsufficientFounds = errors.New("insufficient funds")
+var InvalidAccount = errors.New("invalid account")
+var OpenAccount = errors.New("account is not closed")
 
 var AccountTypesLimit = map[string]int{
 	"checking": 50,

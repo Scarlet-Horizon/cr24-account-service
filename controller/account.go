@@ -210,3 +210,42 @@ func (receiver AccountController) Close(context *gin.Context) {
 	}
 	context.Status(http.StatusNoContent)
 }
+
+//	@description	Delete a specific account.
+//	@summary		Delete a specific account
+//	@tags			account
+//	@param			accountID	path	string			true	"Account ID"
+//	@param			requestBody	body	request.User	true	"User ID"
+//	@success		204			"No Content"
+//	@failure		400			{object}	response.ErrorResponse
+//	@failure		500			{object}	response.ErrorResponse
+//	@router			/account/{accountID} [DELETE]
+func (receiver AccountController) Delete(context *gin.Context) {
+	accountID := context.Param("accountID")
+	if !util.IsValidUUID(accountID) {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		return
+	}
+
+	var req request.User
+	if err := context.ShouldBindJSON(&req); err != nil {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	bankAccount := model.Account{
+		PK: util.GetPK(req.UserID),
+		SK: util.GetSK(accountID),
+	}
+
+	err := receiver.DB.Delete(bankAccount)
+	if err != nil {
+		if errors.Is(err, util.InvalidAccount) || errors.Is(err, util.OpenAccount) {
+			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+			return
+		}
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+	context.Status(http.StatusNoContent)
+}
