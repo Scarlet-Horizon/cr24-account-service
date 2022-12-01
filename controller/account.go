@@ -67,11 +67,12 @@ func (receiver AccountController) Create(context *gin.Context) {
 	context.JSON(http.StatusCreated, bankAccount)
 }
 
-//	@description	Get all accounts for a specific user.
-//	@summary		Get all accounts for a specific user
+//	@description	Get accounts for a specific user.
+//	@summary		Get accounts for a specific user
 //	@produce		json
 //	@tags			account
 //	@param			userID	path		string			true	"User ID"
+//	@param			type	path		string			true	"What accounts to get: 'open', 'closed', 'all'"
 //	@success		200		{object}	[]model.Account	"An array of Account's"
 //	@failure		400		{object}	response.ErrorResponse
 //	@failure		500		{object}	response.ErrorResponse
@@ -84,7 +85,13 @@ func (receiver AccountController) GetAll(context *gin.Context) {
 		return
 	}
 
-	acc, err := receiver.DB.GetAll(userID)
+	t := context.Param("type")
+	if !(t == "open" || t == "closed" || t == "all") {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid type, supported: 'open', 'closed', all"})
+		return
+	}
+
+	acc, err := receiver.DB.GetAll(userID, t)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return

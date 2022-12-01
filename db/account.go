@@ -61,9 +61,19 @@ func (receiver AccountDB) getAllWithFilter(id string, t string) (model.Account, 
 	return model.Account{}, util.AlreadyExists
 }
 
-func (receiver AccountDB) GetAll(id string) ([]model.Account, error) {
+func (receiver AccountDB) GetAll(id, t string) ([]model.Account, error) {
 	keyCond, _ := getKeyConAndFilter(id, "")
-	return receiver.getAll(keyCond, expression.ConditionBuilder{}, false)
+
+	var filter expression.ConditionBuilder
+	isFilter := true
+	if t == "open" {
+		filter = expression.Name("CloseDate").AttributeNotExists()
+	} else if t == "closed" {
+		filter = expression.Name("CloseDate").AttributeExists()
+	} else {
+		isFilter = false
+	}
+	return receiver.getAll(keyCond, filter, isFilter)
 }
 
 func (receiver AccountDB) getAll(keyCond expression.KeyConditionBuilder, filter expression.ConditionBuilder,
