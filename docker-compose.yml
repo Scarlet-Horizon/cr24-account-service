@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   api:
-    image: davidslatinek/account-api:0.1
+    image: davidslatinek/account-api:0.3
     ports:
       - "8080:8080"
     networks:
