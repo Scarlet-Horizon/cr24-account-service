@@ -10,6 +10,7 @@ import (
 	"main/response"
 	"main/util"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -78,30 +79,33 @@ func (receiver AccountController) Create(context *gin.Context) {
 //	@failure		500		{object}	response.ErrorResponse
 //	@router			/accounts/{userID} [GET]
 func (receiver AccountController) GetAll(context *gin.Context) {
-	userID := context.Param("userID")
-
-	if !util.IsValidUUID(userID) {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid user id"})
-		return
+	//userID := context.Param("userID")
+	//
+	//if !util.IsValidUUID(userID) {
+	//	context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid user id"})
+	//	return
+	//}
+	//
+	//t := context.Param("type")
+	//if !(t == "open" || t == "closed" || t == "all") {
+	//	context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid type, supported: 'open', 'closed', all"})
+	//	return
+	//}
+	//
+	//acc, err := receiver.DB.GetAll(userID, t)
+	//if err != nil {
+	//	context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+	//	return
+	//}
+	//
+	//if len(acc) == 0 {
+	//	context.Status(http.StatusNoContent)
+	//	return
+	//}
+	acc := receiver.get(context)
+	if acc != nil {
+		context.JSON(http.StatusOK, acc)
 	}
-
-	t := context.Param("type")
-	if !(t == "open" || t == "closed" || t == "all") {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid type, supported: 'open', 'closed', all"})
-		return
-	}
-
-	acc, err := receiver.DB.GetAll(userID, t)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	if len(acc) == 0 {
-		context.Status(http.StatusNoContent)
-		return
-	}
-	context.JSON(http.StatusOK, acc)
 }
 
 func (receiver AccountController) depositWithdraw(context *gin.Context, deposit bool) {
@@ -297,4 +301,64 @@ func (receiver AccountController) GetAccount(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, acc)
+}
+
+func (receiver AccountController) get(context *gin.Context) []model.Account {
+	userID := context.Param("userID")
+
+	if !util.IsValidUUID(userID) {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid user id"})
+		return nil
+	}
+
+	t := context.Param("type")
+	if !(t == "open" || t == "closed" || t == "all") {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid type, supported: 'open', 'closed', all"})
+		return nil
+	}
+
+	acc, err := receiver.DB.GetAll(userID, t)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+		return nil
+	}
+
+	if len(acc) == 0 {
+		context.Status(http.StatusNoContent)
+		return nil
+	}
+	return acc
+}
+
+//	@description	Get all accounts with transactions for a given user.
+//	@summary		Get all accounts with transactions for a given user
+//	@produce		json
+//	@tags			account
+//	@param			userID	path		string	true	"User ID"
+//	@param			type	path		string	true	"What accounts to get: 'open', 'closed', 'all'"
+//	@success		200		{object}	model.Account
+//	@failure		400		{object}	response.ErrorResponse
+//	@failure		500		{object}	response.ErrorResponse
+//	@router			/account/{userID}/{type} [GET]
+func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
+	acc := receiver.get(context)
+	if acc == nil {
+		return
+	}
+
+	var accTr []model.AccountTransaction
+	for _, v := range acc {
+		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1])
+
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+			return
+		}
+
+		accTr = append(accTr, model.AccountTransaction{
+			Account:      v,
+			Transactions: tr,
+		})
+	}
+	context.JSON(http.StatusOK, accTr)
 }

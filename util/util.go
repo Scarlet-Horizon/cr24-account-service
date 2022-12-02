@@ -1,9 +1,13 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"io"
 	"log"
+	"main/model"
+	"net/http"
 	"strings"
 )
 
@@ -41,4 +45,35 @@ func GetSK(id string) string {
 		return id
 	}
 	return "ACCOUNT#" + id
+}
+
+func GetTransactions(accountID string) ([]model.Transaction, error) {
+	res, err := http.Get("http://transaction-api:8085/api/v1/transaction/" + accountID + "/all")
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer func(body io.ReadCloser) {
+		if err := body.Close(); err != nil {
+			log.Printf("Close error: %s\n", err)
+		}
+	}(res.Body)
+
+	if res.StatusCode == http.StatusNoContent {
+		return []model.Transaction{}, nil
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(string(data))
+	}
+
+	var tr []model.Transaction
+	if err := json.Unmarshal(data, &tr); err != nil {
+		return nil, errors.New("encode data error: " + err.Error())
+	}
+	return tr, nil
 }
