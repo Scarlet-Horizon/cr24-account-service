@@ -256,3 +256,45 @@ func (receiver AccountController) Delete(context *gin.Context) {
 	}
 	context.Status(http.StatusNoContent)
 }
+
+//	@description	Get a specific account.
+//	@summary		Get a specific account
+//	@produce		json
+//	@tags			account
+//	@param			accountID	path		string			true	"Account ID"
+//	@param			requestBody	body		request.User	true	"User ID"
+//	@success		200			{object}	model.Account
+//	@failure		400			{object}	response.ErrorResponse
+//	@failure		500			{object}	response.ErrorResponse
+//	@router			/account/{accountID} [GET]
+func (receiver AccountController) GetAccount(context *gin.Context) {
+	accountID := context.Param("accountID")
+
+	if !util.IsValidUUID(accountID) {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		return
+	}
+
+	var req request.User
+	if err := context.ShouldBindJSON(&req); err != nil {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	bankAccount := model.Account{
+		PK: util.GetPK(req.UserID),
+		SK: util.GetSK(accountID),
+	}
+
+	acc, err := receiver.DB.GetAccount(bankAccount)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if acc.PK == "" {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: util.InvalidAccount.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, acc)
+}

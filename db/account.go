@@ -120,7 +120,7 @@ func (receiver AccountDB) getAll(keyCond expression.KeyConditionBuilder, filter 
 	return accounts, nil
 }
 
-func (receiver AccountDB) getAccount(account model.Account) (model.Account, error) {
+func (receiver AccountDB) GetAccount(account model.Account) (model.Account, error) {
 	primaryKey := map[string]string{
 		"PK": util.GetPK(account.PK),
 		"SK": util.GetSK(account.SK),
@@ -163,7 +163,7 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 		return err
 	}
 
-	acc, err := receiver.getAccount(account)
+	acc, err := receiver.GetAccount(account)
 	if err != nil || acc.PK == "" {
 		return errors.New("invalid account")
 	}
@@ -181,7 +181,7 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 		upd = expression.Set(expression.Name("Amount"), expression.Plus(expression.Name("Amount"),
 			expression.Value(amount)))
 	} else {
-		acc, er := receiver.getAccount(account)
+		acc, er := receiver.GetAccount(account)
 		if er != nil {
 			return er
 		}
@@ -234,7 +234,7 @@ func (receiver AccountDB) Close(account model.Account) error {
 		return err
 	}
 
-	acc, err := receiver.getAccount(account)
+	acc, err := receiver.GetAccount(account)
 	if err != nil || acc.PK == "" {
 		return errors.New("invalid account")
 	}
@@ -279,7 +279,7 @@ func (receiver AccountDB) Delete(account model.Account) error {
 		return err
 	}
 
-	acc, err := receiver.getAccount(account)
+	acc, err := receiver.GetAccount(account)
 	if err != nil || acc.PK == "" {
 		return util.InvalidAccount
 	}
