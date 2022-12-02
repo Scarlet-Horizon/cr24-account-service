@@ -61,6 +61,7 @@ func main() {
 	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	router := gin.Default()
+	router.Use(util.CORSMiddleware())
 	api := router.Group("api/v1")
 	{
 		api.POST("/account", accountController.Create)
