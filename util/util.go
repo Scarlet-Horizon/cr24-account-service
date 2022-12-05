@@ -3,13 +3,18 @@ package util
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"io"
 	"log"
 	"main/model"
+	"main/response"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 )
 
 const TableName = "Account"
@@ -79,12 +84,81 @@ func GetTransactions(accountID string) ([]model.Transaction, error) {
 	return tr, nil
 }
 
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, DELETE, PATCH")
-		c.Next()
+func ValidateToken(context *gin.Context) {
+	token := context.GetHeader("Authorization")
+	if token == "" {
+		context.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "unauthorized"})
+		context.Abort()
+		return
 	}
+
+	values := strings.Split(token, "Bearer ")
+	if len(values) != 2 {
+		context.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "token is not set properly"})
+		context.Abort()
+		return
+	}
+
+	token = values[1]
+
+	to, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+		context.Abort()
+		return
+	}
+
+	if !to.Valid {
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid token"})
+		context.Abort()
+		return
+	}
+
+	if claims, ok := to.Claims.(jwt.MapClaims); ok {
+		if claims["sub"] == "" {
+			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid id"})
+			context.Abort()
+			return
+		}
+
+		if claims["iat"] == "" || claims["exp"] == "" {
+			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "iat or exp not set"})
+			context.Abort()
+			return
+		}
+
+		tokenIat := time.Unix(int64(claims["iat"].(float64)), 0)
+		if tokenIat.After(time.Now()) {
+			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "iat can't be in the future"})
+			context.Abort()
+			return
+		}
+
+		tokenExp := time.Unix(int64(claims["exp"].(float64)), 0)
+		if tokenExp.Before(time.Now()) {
+			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "expired token"})
+			context.Abort()
+			return
+		}
+
+		context.Set("ID", claims["sub"])
+		context.Next()
+		return
+	}
+	context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid token"})
 }
+
+//func CORSMiddleware() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+//		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+//		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+//		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, DELETE, PATCH")
+//		c.Next()
+//	}
+//}
