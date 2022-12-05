@@ -1,12 +1,5 @@
 package request
 
-//	@description	User request
-//	@description	with user id
-type User struct {
-	// User ID
-	UserID string `json:"userID" binding:"required,uuid" example:"425129d3-72b3-4c64-8556-fe7da1889981"`
-} //	@name	User
-
 //	@description	AccountRequest request with account type
 type AccountRequest struct {
 	// Account type. One of the following: 'checking', 'saving'
@@ -16,13 +9,7 @@ type AccountRequest struct {
 //	@description	MonetaryRequest request
 //	@description	with user id and amount to deposit
 type MonetaryRequest struct {
-	User
+	//User
 	// Amount to deposit or withdraw
 	Amount float64 `json:"amount" binding:"required" example:"45.12" minimum:"1" validate:"required"`
 } //	@name	MonetaryRequest
-
-//	@description	CloseRequest request
-//	@description	with user id
-type CloseRequest struct {
-	User
-} //	@name	CloseRequest

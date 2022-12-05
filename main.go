@@ -72,9 +72,9 @@ func main() {
 	{
 		api.POST("/account", accountController.Create)
 
-		api.GET("/accounts/:userID/:type", accountController.GetAll)
-		api.GET("/accounts/:userID/:type/transactions", accountController.GetAllWithTransactions)
-		api.GET("/account/:userID/:accountID", accountController.GetAccount)
+		api.GET("/accounts/:type", accountController.GetAll)
+		api.GET("/accounts/:type/transactions", accountController.GetAllWithTransactions)
+		api.GET("/account/:accountID", accountController.GetAccount)
 
 		api.PATCH("/account/:accountID/deposit", accountController.Deposit)
 		api.PATCH("/account/:accountID/withdraw", accountController.Withdraw)

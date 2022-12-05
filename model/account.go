@@ -35,6 +35,8 @@ type Account struct {
 	CloseDate *time.Time `dynamodbav:"CloseDate,omitempty,unixtime" json:"closeDate,omitempty" example:"2022-12-21T14:40:20+01:00"`
 	// Account type. One of the following: 'checking', 'saving'
 	Type string `dynamodbav:"Type" json:"type" example:"checking" enums:"checking,saving"`
+	// Account transactions
+	Transactions []Transaction `json:"transactions,omitempty"`
 } //@name Account
 
 func (account Account) MarshalJSON() ([]byte, error) {
