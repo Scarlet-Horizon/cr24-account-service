@@ -27,6 +27,10 @@ type AccountController struct {
 //	@success		201			{object}	model.Account
 //	@failure		400			{object}	response.ErrorResponse
 //	@failure		500			{object}	response.ErrorResponse
+//	@security		JWT
+//
+//	@param			Authorization	header	string	true	"Authorization"
+//
 //	@router			/account [POST]
 func (receiver AccountController) Create(context *gin.Context) {
 	var req request.AccountRequest

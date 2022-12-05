@@ -22,9 +22,13 @@ func (receiver AccountDB) Create(account model.Account) error {
 		return err
 	}
 
-	_, err = receiver.getAllWithFilter(account.PK, account.Type)
+	keyCond, filter := getKeyConAndFilter(account.PK, account.Type)
+	accounts, err := receiver.getAll(keyCond, filter, true)
 	if err != nil {
 		return err
+	}
+	if len(accounts) != 0 {
+		return util.AlreadyExists
 	}
 
 	accInput := &dynamodb.PutItemInput{
@@ -46,19 +50,6 @@ func getKeyConAndFilter(id string, t string) (expression.KeyConditionBuilder, ex
 	)
 	filter := expression.Name("Type").Equal(expression.Value(t))
 	return keyCond, filter
-}
-
-func (receiver AccountDB) getAllWithFilter(id string, t string) (model.Account, error) {
-	keyCond, filter := getKeyConAndFilter(id, t)
-	accounts, err := receiver.getAll(keyCond, filter, true)
-	if err != nil {
-		return model.Account{}, err
-	}
-
-	if len(accounts) == 0 {
-		return model.Account{}, nil
-	}
-	return model.Account{}, util.AlreadyExists
 }
 
 func (receiver AccountDB) GetAll(id, t string) ([]model.Account, error) {

@@ -37,6 +37,10 @@ import (
 //	@license.name	GNU General Public License v3.0
 //	@license.url	https://www.gnu.org/licenses/gpl-3.0.html
 
+//	@securityDefinitions.apikey	JWT
+//@in header
+//@name Authorization
+
 //	@host		localhost:8080
 //	@BasePath	/api/v1
 func main() {
