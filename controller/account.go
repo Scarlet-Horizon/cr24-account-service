@@ -295,7 +295,7 @@ func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 
 	var accTr []model.Account
 	for _, v := range acc {
-		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1])
+		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1], context.MustGet("token").(string))
 
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})

@@ -48,14 +48,21 @@ func GetSK(id string) string {
 	return "ACCOUNT#" + id
 }
 
-func GetTransactions(accountID string) ([]model.Transaction, error) {
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
-
-	res, err := client.Get("http://transaction-api:8085/api/v1/transaction/" + accountID + "/all")
+func GetTransactions(accountID, token string) ([]model.Transaction, error) {
+	req, err := http.NewRequest(http.MethodGet, "http://transaction-api:8085/api/v1/transaction/"+accountID+"/all", nil)
 	if err != nil {
 		return nil, err
+	}
+	
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
 	}
 
 	data, err := io.ReadAll(res.Body)
@@ -146,6 +153,7 @@ func ValidateToken(context *gin.Context) {
 		}
 
 		context.Set("ID", claims["sub"])
+		context.Set("token", token)
 		context.Next()
 		return
 	}
