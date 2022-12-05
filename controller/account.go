@@ -281,7 +281,7 @@ func (receiver AccountController) get(context *gin.Context) []model.Account {
 //	@produce		json
 //	@tags			account
 //	@param			type	path		string	true	"What accounts to get: 'open', 'closed', 'all'"
-//	@success		200		{object}	[]model.AccountTransaction
+//	@success		200		{object}	[]model.Account
 //	@failure		400		{object}	response.ErrorResponse
 //	@failure		500		{object}	response.ErrorResponse
 //	@security		JWT
@@ -293,7 +293,7 @@ func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 		return
 	}
 
-	var accTr []model.AccountTransaction
+	var accTr []model.Account
 	for _, v := range acc {
 		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1])
 
@@ -302,10 +302,9 @@ func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 			return
 		}
 
-		accTr = append(accTr, model.AccountTransaction{
-			Account:      v,
-			Transactions: tr,
-		})
+		account := v
+		account.Transactions = tr
+		accTr = append(accTr, account)
 	}
 	context.JSON(http.StatusOK, accTr)
 }
