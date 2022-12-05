@@ -53,7 +53,7 @@ func GetTransactions(accountID, token string) ([]model.Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	client := http.Client{
@@ -62,7 +62,7 @@ func GetTransactions(accountID, token string) ([]model.Transaction, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		return []model.Transaction{}, err
 	}
 
 	data, err := io.ReadAll(res.Body)
@@ -80,12 +80,12 @@ func GetTransactions(accountID, token string) ([]model.Transaction, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(string(data))
+		return nil, errors.New("error: " + string(data))
 	}
 
 	var tr []model.Transaction
 	if err := json.Unmarshal(data, &tr); err != nil {
-		return nil, errors.New("encode data error: " + err.Error())
+		return nil, err
 	}
 	return tr, nil
 }
