@@ -92,7 +92,7 @@ func (receiver AccountDB) getAll(keyCond expression.KeyConditionBuilder, filter 
 		input.FilterExpression = expr.Filter()
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	result, err := receiver.Client.Query(ctx, input)
@@ -128,7 +128,7 @@ func (receiver AccountDB) GetAccount(account model.Account) (model.Account, erro
 		ConsistentRead: aws.Bool(true),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	result, err := receiver.Client.GetItem(ctx, input)
@@ -199,7 +199,7 @@ func (receiver AccountDB) depositWithdraw(account model.Account, amount float64,
 		UpdateExpression:          expr.Update(),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err = receiver.Client.UpdateItem(ctx, input)
@@ -252,7 +252,7 @@ func (receiver AccountDB) Close(account model.Account) error {
 		UpdateExpression:          expr.Update(),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err = receiver.Client.UpdateItem(ctx, input)
@@ -293,7 +293,7 @@ func (receiver AccountDB) Delete(account model.Account) error {
 		ExpressionAttributeValues: expr.Values(),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err = receiver.Client.DeleteItem(ctx, input)
