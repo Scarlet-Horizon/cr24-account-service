@@ -107,7 +107,7 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		util.Log("Shutdown() error", err)
+		log.Printf("Shutdown() error: %s\n", err)
 	}
 
 	log.Println("shutting down")

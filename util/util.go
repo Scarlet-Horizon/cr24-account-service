@@ -29,11 +29,6 @@ var AccountTypesLimit = map[string]int{
 	"saving":   10,
 }
 
-func Log(message string, err error) {
-	log.Println(message)
-	log.Println(err)
-}
-
 func IsValidUUID(u string) bool {
 	_, err := uuid.Parse(u)
 	return err == nil
