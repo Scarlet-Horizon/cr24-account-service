@@ -1,12 +1,30 @@
 package model
 
-import "time"
+import (
+	"encoding/json"
+	"strings"
+	"time"
+)
+
+func getUserID(id string) string {
+	if strings.Contains(id, "USER#") {
+		return strings.Split(id, "USER#")[1]
+	}
+	return id
+}
+
+func getAccountID(id string) string {
+	if strings.Contains(id, "ACCOUNT#") {
+		return strings.Split(id, "ACCOUNT#")[1]
+	}
+	return id
+}
 
 type Account struct {
-	// User UUID. Has a prefix USER#
-	PK string `dynamodbav:"PK" json:"userID" example:"USER#6204037c-30e6-408b-8aaa-dd8219860b4b"`
-	// Account UUID. Has a prefix ACCOUNT#
-	SK string `dynamodbav:"SK" json:"accountID" example:"ACCOUNT#09130407-1f81-4ac5-be85-6557683462d0"`
+	// User UUID
+	PK string `dynamodbav:"PK" json:"userID" example:"6204037c-30e6-408b-8aaa-dd8219860b4b"`
+	// Account UUID
+	SK string `dynamodbav:"SK" json:"accountID" example:"09130407-1f81-4ac5-be85-6557683462d0"`
 	// Account amount
 	Amount float64 `dynamodbav:"Amount" json:"amount" example:"50.5"`
 	// Account limit
@@ -18,3 +36,16 @@ type Account struct {
 	// Account type. One of the following: 'checking', 'saving'
 	Type string `dynamodbav:"Type" json:"type" example:"checking" enums:"checking,saving"`
 } //@name Account
+
+func (account Account) MarshalJSON() ([]byte, error) {
+	type Alias Account
+	return json.Marshal(&struct {
+		PK string `dynamodbav:"PK" json:"userID" example:"6204037c-30e6-408b-8aaa-dd8219860b4b"`
+		SK string `dynamodbav:"SK" json:"accountID" example:"09130407-1f81-4ac5-be85-6557683462d0"`
+		*Alias
+	}{
+		PK:    getUserID(account.PK),
+		SK:    getAccountID(account.SK),
+		Alias: (*Alias)(&account),
+	})
+}

@@ -32,7 +32,7 @@ func (receiver AccountDB) Create(account model.Account) error {
 		TableName: aws.String(util.TableName),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err = receiver.Client.PutItem(ctx, accInput)

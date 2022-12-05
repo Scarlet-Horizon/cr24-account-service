@@ -35,11 +35,6 @@ func (receiver AccountController) Create(context *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUUID(req.UserID) {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid user id"})
-		return
-	}
-
 	var limit int
 	var ok bool
 	if limit, ok = util.AccountTypesLimit[req.Type]; !ok {
@@ -48,7 +43,7 @@ func (receiver AccountController) Create(context *gin.Context) {
 	}
 
 	bankAccount := model.Account{
-		PK:       util.GetPK(req.UserID),
+		PK:       util.GetPK(context.MustGet("ID").(string)),
 		SK:       util.GetSK(uuid.NewString()),
 		Amount:   0,
 		Limit:    limit,
