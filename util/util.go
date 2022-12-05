@@ -49,7 +49,11 @@ func GetSK(id string) string {
 }
 
 func GetTransactions(accountID string) ([]model.Transaction, error) {
-	res, err := http.Get("http://transaction-api:8085/api/v1/transaction/" + accountID + "/all")
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	res, err := client.Get("http://transaction-api:8085/api/v1/transaction/" + accountID + "/all")
 	if err != nil {
 		return nil, err
 	}
