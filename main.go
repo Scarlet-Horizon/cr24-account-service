@@ -44,12 +44,15 @@ func main() {
 
 	err := env.Load("env/.env")
 	if err != nil {
-		log.Fatalf("failed to load env variables: %v", err)
+		log.Fatalf("failed to load env variables: %s", err)
 	}
 
-	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(os.Getenv("REGION")))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(os.Getenv("REGION")))
 	if err != nil {
-		log.Fatalf("failed to load SDK config, %v", err)
+		log.Fatalf("failed to load SDK config, %s", err)
 	}
 
 	accountController := controller.AccountController{
@@ -61,7 +64,7 @@ func main() {
 	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	router := gin.Default()
-	router.Use(util.CORSMiddleware())
+	//router.Use(util.CORSMiddleware())
 	api := router.Group("api/v1")
 	{
 		api.POST("/account", accountController.Create)
@@ -97,7 +100,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
 	<-c
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
