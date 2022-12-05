@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
+	"io"
 	"log"
 	"main/controller"
 	"main/db"
@@ -66,6 +67,15 @@ func main() {
 	}
 
 	gin.SetMode(os.Getenv("GIN_MODE"))
+
+	if gin.Mode() == gin.ReleaseMode {
+		gin.DisableConsoleColor()
+
+		f, err := os.Create("gin.log")
+		if err != nil {
+			gin.DefaultWriter = io.MultiWriter(f)
+		}
+	}
 
 	router := gin.Default()
 	api := router.Group("api/v1").Use(util.ValidateToken)
