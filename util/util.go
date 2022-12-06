@@ -162,5 +162,7 @@ func ValidateToken(context *gin.Context) {
 
 func CORS(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
+	context.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, Authorization")
+	context.Header("Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS")
 	context.Next()
 }
