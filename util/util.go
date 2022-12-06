@@ -159,3 +159,8 @@ func ValidateToken(context *gin.Context) {
 	}
 	context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid token"})
 }
+
+func CORS(context *gin.Context) {
+	context.Header("Access-Control-Allow-Origin", "*")
+	context.Next()
+}

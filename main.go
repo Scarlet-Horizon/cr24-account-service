@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
@@ -79,7 +78,7 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(util.CORS)
 	api := router.Group("api/v1").Use(util.ValidateToken)
 	{
 		api.POST("/account", accountController.Create)
