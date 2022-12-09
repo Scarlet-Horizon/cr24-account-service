@@ -36,7 +36,7 @@ type Account struct {
 	// Account type. One of the following: 'checking', 'saving'
 	Type string `dynamodbav:"Type" json:"type" example:"checking" enums:"checking,saving"`
 	// Account transactions
-	Transactions []Transaction `json:"transactions,omitempty"`
+	Transactions []Transaction `dynamodbav:"omitempty" json:"transactions,omitempty"`
 } //@name Account
 
 func (account Account) MarshalJSON() ([]byte, error) {
