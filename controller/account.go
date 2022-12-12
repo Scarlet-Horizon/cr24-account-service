@@ -37,6 +37,8 @@ func (receiver AccountController) Create(context *gin.Context) {
 		return
 	}
 
+	//return
+
 	var limit int
 	var ok bool
 	if limit, ok = util.AccountTypesLimit[req.Type]; !ok {

@@ -14,6 +14,7 @@ import (
 	"main/db"
 	_ "main/docs"
 	"main/env"
+	"main/messaging"
 	"main/util"
 	"math/rand"
 	"net/http"
@@ -77,8 +78,10 @@ func main() {
 		}
 	}
 
+	msg := messaging.Messaging{}
+
 	router := gin.Default()
-	router.Use(util.CORS)
+	router.Use(util.CORS).Use(msg.Info)
 	api := router.Group("api/v1").Use(util.ValidateToken)
 	{
 		api.POST("/account", accountController.Create)
