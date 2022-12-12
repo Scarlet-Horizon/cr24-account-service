@@ -14,6 +14,7 @@ import (
 	"main/db"
 	_ "main/docs"
 	"main/env"
+	"main/messaging"
 	"main/util"
 	"math/rand"
 	"net/http"
@@ -78,7 +79,17 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.Use(util.CORS).Use(util.Info)
+
+	msg := messaging.Messaging{}
+	err = msg.Init()
+	if err != nil {
+		log.Printf("error with messaging: %s\n", err)
+	} else {
+		router.Use(msg.WriteInfo)
+		defer msg.Close()
+	}
+
+	router.Use(util.CORS)
 	api := router.Group("api/v1").Use(util.ValidateToken)
 	{
 		api.POST("/account", accountController.Create)
@@ -122,5 +133,4 @@ func main() {
 	}
 
 	log.Println("shutting down")
-	os.Exit(0)
 }

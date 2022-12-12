@@ -51,11 +51,10 @@ func logging(level string, context *gin.Context) string {
 	return sb.String()
 }
 
-func Info(context *gin.Context) {
-	fmt.Print(logging("info", context) + "\n")
+func Info(context *gin.Context) string {
+	return logging("info", context) + "\n"
 }
 
-func Error(err string, context *gin.Context) {
-	s := logging("error", context) + " msg=" + err + "\n"
-	fmt.Println(s)
+func Error(err string, context *gin.Context) string {
+	return logging("error", context) + " msg=" + err + "\n"
 }

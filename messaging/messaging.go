@@ -1,8 +1,13 @@
 package messaging
 
 import (
+	"context"
+	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
+	"main/util"
+	"os"
+	"time"
 )
 
 type Messaging struct {
@@ -12,7 +17,7 @@ type Messaging struct {
 }
 
 func (receiver Messaging) Init() error {
-	conn, err := amqp.Dial("ampq://studentdocker.informatika.uni-mb.si:5672")
+	conn, err := amqp.Dial(os.Getenv("AMQP_URL"))
 	if err != nil {
 		return err
 	}
@@ -47,5 +52,34 @@ func (receiver Messaging) Close() {
 	if receiver.channel != nil {
 		err := receiver.channel.Close()
 		log.Printf("channel close error: %v", err)
+	}
+}
+
+func (receiver Messaging) write(message string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return receiver.channel.PublishWithContext(ctx,
+		"SIPIA-4",
+		receiver.queue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(message),
+		})
+}
+
+func (receiver Messaging) WriteInfo(context *gin.Context) {
+	err := receiver.write(util.Info(context))
+	if err != nil {
+		log.Printf("error with messaging info: %s\n", err)
+	}
+}
+
+func (receiver Messaging) WriteError(errDesc string, context *gin.Context)  {
+	err := receiver.write(util.Error(errDesc, context))
+	if err != nil {
+		log.Printf("error with messaging error: %s\n", err)
 	}
 }
