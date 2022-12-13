@@ -83,10 +83,11 @@ func (receiver *Messaging) WriteInfo(context *gin.Context) {
 
 func (receiver *Messaging) WriteError(context *gin.Context) {
 	context.Next()
-	if context.Errors.Last() != nil {
-		err := receiver.write(util.Error(context.Errors.Last().Error(), context))
-		if err != nil {
-			log.Printf("error with messaging error: %s\n", err)
+
+	for _, err := range context.Errors {
+		returnerErr := receiver.write(util.Error(err.Error(), context))
+		if returnerErr != nil {
+			log.Printf("error with messaging error: %s\n", returnerErr)
 		}
 	}
 }
