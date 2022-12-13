@@ -13,7 +13,7 @@ import (
 type Messaging struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
-	queue   amqp.Queue
+	queue   *amqp.Queue
 }
 
 func (receiver *Messaging) Init() error {
@@ -31,7 +31,7 @@ func (receiver *Messaging) Init() error {
 
 	q, err := ch.QueueDeclare(
 		"account-service",
-		false,
+		true,
 		false,
 		false,
 		false,
@@ -40,18 +40,22 @@ func (receiver *Messaging) Init() error {
 	if err != nil {
 		return err
 	}
-	receiver.queue = q
+	receiver.queue = &q
 	return nil
 }
 
 func (receiver *Messaging) Close() {
-	if receiver.conn != nil {
+	if receiver.conn != nil && !receiver.conn.IsClosed() {
 		err := receiver.conn.Close()
-		log.Printf("conn close error: %v", err)
+		if err != nil {
+			log.Printf("conn close error: %v", err)
+		}
 	}
-	if receiver.channel != nil {
+	if receiver.channel != nil && !receiver.channel.IsClosed() {
 		err := receiver.channel.Close()
-		log.Printf("channel close error: %v", err)
+		if err != nil {
+			log.Printf("channel close error: %v", err)
+		}
 	}
 }
 
@@ -60,7 +64,7 @@ func (receiver *Messaging) write(message string) error {
 	defer cancel()
 
 	return receiver.channel.PublishWithContext(ctx,
-		"SIPIA-4",
+		"",
 		receiver.queue.Name,
 		false,
 		false,
