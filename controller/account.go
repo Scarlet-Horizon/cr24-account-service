@@ -33,18 +33,16 @@ type AccountController struct {
 func (receiver AccountController) Create(context *gin.Context) {
 	var req request.AccountRequest
 	if err := context.ShouldBindJSON(&req); err != nil {
+		err := context.Error(err)
 		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	//util.Error("fatal", context)
-
-	return
-
 	var limit int
 	var ok bool
 	if limit, ok = util.AccountTypesLimit[req.Type]; !ok {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account type. Supported options are: 'checking', 'saving'"})
+		err := context.Error(errors.New("invalid account type. Supported options are: 'checking', 'saving'"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -60,9 +58,11 @@ func (receiver AccountController) Create(context *gin.Context) {
 	err := receiver.DB.Create(bankAccount)
 	if err != nil {
 		if errors.Is(err, util.AlreadyExists) {
+			_ = context.Error(err)
 			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 			return
 		}
+		_ = context.Error(err)
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}

@@ -75,7 +75,7 @@ func main() {
 	if err != nil {
 		log.Printf("error with messaging: %s\n", err)
 	} else {
-		router.Use(msg.WriteInfo)
+		router.Use(msg.WriteInfo).Use(msg.WriteError)
 		defer msg.Close()
 	}
 
@@ -95,6 +95,10 @@ func main() {
 		api.DELETE("/account/:accountID", accountController.Delete)
 	}
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	//if err == nil {
+	//	router.Use(msg.WriteError)
+	//}
 
 	srv := &http.Server{
 		Addr:         ":8080",
