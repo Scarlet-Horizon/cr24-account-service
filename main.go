@@ -96,10 +96,6 @@ func main() {
 	}
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	//if err == nil {
-	//	router.Use(msg.WriteError)
-	//}
-
 	srv := &http.Server{
 		Addr:         ":8080",
 		WriteTimeout: time.Second * 15,

@@ -13,7 +13,7 @@ import (
 func logging(level string, context *gin.Context) string {
 	var sb strings.Builder
 
-	sb.WriteString("time=" + time.Now().Format("2006-01-02 15-04-05"))
+	sb.WriteString(fmt.Sprintf("time=\"%s\"", time.Now().Format("2006-01-02 15-04-05")))
 	sb.WriteString(" id=" + uuid.NewString())
 	sb.WriteString(" level=" + level)
 	sb.WriteString(" path=" + context.Request.RequestURI)
@@ -52,9 +52,9 @@ func logging(level string, context *gin.Context) string {
 }
 
 func Info(context *gin.Context) string {
-	return logging("info", context) + "\n"
+	return logging("info", context)
 }
 
 func Error(err string, context *gin.Context) string {
-	return logging("error", context) + " msg=" + err + "\n"
+	return logging("error", context) + " msg=" + fmt.Sprintf("\"%s\"", err)
 }

@@ -33,7 +33,7 @@ type AccountController struct {
 func (receiver AccountController) Create(context *gin.Context) {
 	var req request.AccountRequest
 	if err := context.ShouldBindJSON(&req); err != nil {
-		err := context.Error(err)
+		_ = context.Error(err)
 		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -57,12 +57,11 @@ func (receiver AccountController) Create(context *gin.Context) {
 
 	err := receiver.DB.Create(bankAccount)
 	if err != nil {
+		_ = context.Error(err)
 		if errors.Is(err, util.AlreadyExists) {
-			_ = context.Error(err)
 			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 			return
 		}
-		_ = context.Error(err)
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -90,18 +89,21 @@ func (receiver AccountController) GetAll(context *gin.Context) {
 func (receiver AccountController) depositWithdraw(context *gin.Context, deposit bool) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		err := context.Error(errors.New("invalid account id"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	var req request.MonetaryRequest
 	if err := context.ShouldBindJSON(&req); err != nil {
+		_ = context.Error(err)
 		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if req.Amount < 1 {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid amount, minimum is 1"})
+		err := context.Error(errors.New("invalid amount, minimum is 1"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -113,12 +115,14 @@ func (receiver AccountController) depositWithdraw(context *gin.Context, deposit 
 	if deposit {
 		err := receiver.DB.Deposit(bankAccount, req.Amount)
 		if err != nil {
+			_ = context.Error(err)
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 			return
 		}
 	} else {
 		err := receiver.DB.Withdraw(bankAccount, req.Amount)
 		if err != nil {
+			_ = context.Error(err)
 			if errors.Is(err, util.InsufficientFounds) {
 				context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 				return
@@ -173,7 +177,8 @@ func (receiver AccountController) Withdraw(context *gin.Context) {
 func (receiver AccountController) Close(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		err := context.Error(errors.New("invalid account id"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -184,6 +189,7 @@ func (receiver AccountController) Close(context *gin.Context) {
 
 	err := receiver.DB.Close(bankAccount)
 	if err != nil {
+		_ = context.Error(err)
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -203,7 +209,8 @@ func (receiver AccountController) Close(context *gin.Context) {
 func (receiver AccountController) Delete(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		err := context.Error(errors.New("invalid account id"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -214,6 +221,7 @@ func (receiver AccountController) Delete(context *gin.Context) {
 
 	err := receiver.DB.Delete(bankAccount)
 	if err != nil {
+		_ = context.Error(err)
 		if errors.Is(err, util.InvalidAccount) || errors.Is(err, util.OpenAccount) {
 			context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 			return
@@ -238,7 +246,8 @@ func (receiver AccountController) Delete(context *gin.Context) {
 func (receiver AccountController) GetAccount(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid account id"})
+		err := context.Error(errors.New("invalid account id"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -249,12 +258,14 @@ func (receiver AccountController) GetAccount(context *gin.Context) {
 
 	acc, err := receiver.DB.GetAccount(bankAccount)
 	if err != nil {
+		_ = context.Error(err)
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if acc.PK == "" {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: util.InvalidAccount.Error()})
+		err := context.Error(util.InvalidAccount)
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 	context.JSON(http.StatusOK, acc)
@@ -263,12 +274,14 @@ func (receiver AccountController) GetAccount(context *gin.Context) {
 func (receiver AccountController) get(context *gin.Context) []model.Account {
 	t := context.Param("type")
 	if !(t == "open" || t == "closed" || t == "all") {
-		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid type, supported: 'open', 'closed', all"})
+		err := context.Error(errors.New("invalid type, supported: 'open', 'closed', all"))
+		context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return nil
 	}
 
 	acc, err := receiver.DB.GetAll(context.MustGet("ID").(string), t)
 	if err != nil {
+		_ = context.Error(err)
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return nil
 	}
@@ -302,6 +315,7 @@ func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1], context.MustGet("token").(string))
 
 		if err != nil {
+			_ = context.Error(err)
 			context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 			return
 		}
