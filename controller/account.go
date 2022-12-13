@@ -37,7 +37,7 @@ func (receiver AccountController) Create(context *gin.Context) {
 		return
 	}
 
-	util.Error("fatal", context)
+	//util.Error("fatal", context)
 
 	return
 
