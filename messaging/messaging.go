@@ -64,7 +64,7 @@ func (receiver *Messaging) write(message string) error {
 	defer cancel()
 
 	return receiver.channel.PublishWithContext(ctx,
-		"",
+		"SIPIA-4",
 		receiver.queue.Name,
 		false,
 		false,
