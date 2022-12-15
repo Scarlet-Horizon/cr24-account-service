@@ -49,19 +49,13 @@ func GetSK(id string) string {
 	return "ACCOUNT#" + id
 }
 
-func UploadStat(ctx *gin.Context) {
-	payload, err := json.Marshal(map[string]string{"endpoint": ctx.FullPath()})
-	if err != nil {
-		log.Printf("Marshal error: %v", err)
-		return
-	}
-
-	req, err := http.NewRequest(http.MethodPost, "http://account-stat:8090/api/v1/stat", bytes.NewBuffer(payload))
+func upload(url, token string, payload []byte) {
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payload))
 	if err != nil {
 		log.Printf("NewRequest error: %v", err)
 		return
 	}
-	req.Header.Add("Authorization", "Bearer "+ctx.MustGet("token").(string))
+	req.Header.Add("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{
@@ -88,6 +82,27 @@ func UploadStat(ctx *gin.Context) {
 	if res.StatusCode == http.StatusBadRequest || res.StatusCode == http.StatusInternalServerError {
 		log.Printf("ReadAll error: %v", string(data))
 	}
+}
+
+func UploadStat(ctx *gin.Context) {
+	payload, err := json.Marshal(map[string]string{"endpoint": ctx.FullPath()})
+	if err != nil {
+		log.Printf("Marshal error: %v", err)
+		return
+	}
+
+	upload("http://account-stat:8090/api/v1/stat", ctx.MustGet("token").(string), payload)
+}
+
+func UploadAccount(account model.Account, ctx *gin.Context) {
+	payload, err := json.Marshal(map[string]string{"userID": account.PK, "accountID": account.SK, "type": account.Type,
+		"openDate": time.Now().Format("2006-01-02 15:04:05")})
+	if err != nil {
+		log.Printf("Marshal error: %v", err)
+		return
+	}
+
+	upload("http://account-stat:8090/api/v1/account", ctx.MustGet("token").(string), payload)
 }
 
 func GetTransactions(accountID, token string) ([]model.Transaction, error) {

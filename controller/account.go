@@ -65,6 +65,7 @@ func (receiver AccountController) Create(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
+	util.UploadAccount(bankAccount, context)
 	context.JSON(http.StatusCreated, bankAccount)
 }
 
