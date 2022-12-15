@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,6 +47,47 @@ func GetSK(id string) string {
 		return id
 	}
 	return "ACCOUNT#" + id
+}
+
+func UploadStat(ctx *gin.Context) {
+	payload, err := json.Marshal(map[string]string{"endpoint": ctx.FullPath()})
+	if err != nil {
+		log.Printf("Marshal error: %v", err)
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPost, "http://account-stat:8090/api/v1/stat", bytes.NewBuffer(payload))
+	if err != nil {
+		log.Printf("NewRequest error: %v", err)
+		return
+	}
+	req.Header.Add("Authorization", "Bearer "+ctx.MustGet("token").(string))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Printf("Do error: %v", err)
+		return
+	}
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("ReadAll error: %v", err)
+		return
+	}
+	defer func(body io.ReadCloser) {
+		if err := body.Close(); err != nil {
+			log.Printf("Close error: %s\n", err)
+		}
+	}(res.Body)
+
+	if res.StatusCode == http.StatusBadRequest || res.StatusCode == http.StatusInternalServerError {
+		log.Printf("ReadAll error: %v", string(data))
+	}
 }
 
 func GetTransactions(accountID, token string) ([]model.Transaction, error) {
