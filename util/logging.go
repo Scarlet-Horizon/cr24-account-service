@@ -14,7 +14,10 @@ func logging(level string, context *gin.Context) string {
 	var sb strings.Builder
 
 	sb.WriteString("time=" + time.Now().Format("2006-01-02 15-04-05"))
-	sb.WriteString(" id=" + uuid.NewString())
+
+	context.Set("Correlation", uuid.NewString())
+	sb.WriteString(" id=" + context.MustGet("Correlation").(string))
+
 	sb.WriteString(" level=" + level)
 	sb.WriteString(" path=" + context.Request.RequestURI)
 

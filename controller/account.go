@@ -313,7 +313,8 @@ func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 
 	var accTr []model.Account
 	for _, v := range acc {
-		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1], context.MustGet("token").(string))
+		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1], context.MustGet("token").(string),
+			context.MustGet("Correlation").(string))
 
 		if err != nil {
 			_ = context.Error(err)

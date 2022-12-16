@@ -105,13 +105,14 @@ func UploadAccount(account model.Account, ctx *gin.Context) {
 	upload("http://account-stat:8090/api/v1/account", ctx.MustGet("token").(string), payload)
 }
 
-func GetTransactions(accountID, token string) ([]model.Transaction, error) {
+func GetTransactions(accountID, token, correlation string) ([]model.Transaction, error) {
 	req, err := http.NewRequest(http.MethodGet, "http://transaction-api:8085/api/v1/transaction/"+accountID+"/all", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Correlation", correlation)
 
 	client := http.Client{
 		Timeout: 10 * time.Second,
