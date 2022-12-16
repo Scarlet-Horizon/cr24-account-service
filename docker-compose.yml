@@ -2,7 +2,6 @@ version: "3.9"
 
 services:
   api:
-#    image: davidslatinek/account-api:0.4
     build: .
     ports:
       - "8080:8080"
@@ -11,6 +10,10 @@ services:
     container_name: account-api-con
     hostname: account-api
     restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 50M
 
 networks:
   sipia_rv1_4:
