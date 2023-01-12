@@ -30,13 +30,13 @@ type Account struct {
 	// Account limit
 	Limit int `dynamodbav:"Limit" json:"limit" example:"50"`
 	// The opening date for the account
-	OpenDate time.Time `dynamodbav:"OpenDate,unixtime" json:"openDate" example:"2022-11-26T11:59:38+01:00"`
+	OpenDate time.Time `dynamodbav:"OpenDate" json:"openDate" example:"2022-11-26T11:59:38+01:00"`
 	// The closing date for the account
-	CloseDate *time.Time `dynamodbav:"CloseDate,omitempty,unixtime" json:"closeDate,omitempty" example:"2022-12-21T14:40:20+01:00"`
+	CloseDate *time.Time `dynamodbav:"CloseDate,omitempty" json:"closeDate,omitempty" example:"2022-12-21T14:40:20+01:00"`
 	// Account type. One of the following: 'checking', 'saving'
 	Type string `dynamodbav:"Type" json:"type" example:"checking" enums:"checking,saving"`
 	// Account transactions
-	Transactions []Transaction `dynamodbav:"omitempty" json:"transactions,omitempty"`
+	Transactions []Transaction `dynamodbav:"Transactions,omitempty" json:"transactions,omitempty"`
 } //@name Account
 
 func (account Account) MarshalJSON() ([]byte, error) {
