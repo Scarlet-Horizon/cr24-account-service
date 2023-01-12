@@ -304,7 +304,7 @@ func (receiver AccountController) get(context *gin.Context) []model.Account {
 //	@failure		500		{object}	response.ErrorResponse
 //	@security		JWT
 //	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account/{type}/transactions [GET]
+//	@router			/accounts/{type}/transactions [GET]
 func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 	acc := receiver.get(context)
 	if acc == nil {
@@ -314,7 +314,7 @@ func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 	var accTr []model.Account
 	for _, v := range acc {
 		tr, err := util.GetTransactions(strings.Split(v.SK, "#")[1], context.MustGet("token").(string),
-			context.MustGet("Correlation").(string))
+			context.GetString("Correlation"))
 
 		if err != nil {
 			_ = context.Error(err)
