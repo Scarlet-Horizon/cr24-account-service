@@ -1,6 +1,4 @@
-# cr24-account-service
-
-# About
+# Description
 
 <div align="center">
     <img alt="Go" src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white"/>
@@ -13,12 +11,103 @@
     <img alt="Swagger" src="https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=Swagger&logoColor=white"/>
 </div>
 
+API for managing bank accounts. The API allows you to create, read, update and delete bank accounts.
+
 The API was made with **Go** and was hosted on **AWS EC2** as a container with **Docker**. For the database, we chose
 **DynamoDB**, which was hosted on **AWS DynamoDB**.
 
 We used **RabbitMQ** for log management and **Swagger** for documentation.
 
-# Contributor
+## Table of Contents
+
+- [Description](#description)
+    - [Table of Contents](#table-of-contents)
+    - [Prerequisites](#prerequisites)
+    - [How to run](#how-to-run)
+        - [Run with Docker (preferred)](#run-with-docker-preferred)
+        - [Run natively](#run-natively)
+    - [Usage](#usage)
+    - [Contributor](#contributor)
+
+## Prerequisites
+
+Go to the [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) website and create a table named `Accounts`. Then go to
+the [Amazon IAM](https://aws.amazon.com/iam/) website and create a user with the following permission:
+`AmazonDynamoDBFullAccess`. Save the credentials for the user or download the `credentials.csv` file.
+
+Create a `.env` file in the `env/` directory and add the following environment variables:
+
+```env
+AWS_ACCESS_KEY_ID = <your_aws_access_key_id>
+AWS_SECRET_ACCESS_KEY = <your_aws_secret_access_key>
+AWS_REGION = <your_aws_region>
+GIN_MODE = release
+JWT_SECRET = <your_jwt_secret>
+AMQP_URL = <your_amqp_url>
+EXCHANGE_QUEUE_NAME = <your_exchange_queue_name>
+```
+
+`AMQP_URL` and `EXCHANGE_QUEUE_NAME` are optional. If you do not specify them, the logs will not be sent to the queue.
+
+## How to run
+
+Firstly, you need to install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/).
+If you wish to run the code without Docker (natively), you need to install [Go](https://golang.org/).
+
+It is recommended to run the code with Docker - see [Run with Docker](#run-with-docker-preferred).
+
+Then run:
+
+```shell
+git clone
+```
+
+or download the repository.
+
+### Run with Docker (preferred)
+
+Run:
+
+```shell
+docker-compose up
+```
+
+in the root directory of the project.
+
+### Run natively
+
+Run:
+
+```shell
+go run main.go
+```
+
+in the root directory of the project.
+
+## Usage
+
+The API is documented with Swagger. You can access the documentation at `http://localhost:8080/swagger/index.html`.
+
+The API is protected with JWT. To get the token, you need to generate it. You can do this online
+at [jwt.io](https://jwt.io/).
+
+The token must contain the following payload:
+
+```json
+{
+  "sub": "<your_id>",
+  "iat": "<current_timestamp>",
+  "exp": "<current_timestamp + desired_expiration_time>"
+}
+```
+
+The JWT token must be sent in the `Authorization` header in the following format:
+
+```text
+Authorization <your_jwt_token>
+```
+
+## Contributor
 
 <table>
     <tbody>

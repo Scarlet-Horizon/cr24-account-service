@@ -4,7 +4,7 @@ WORKDIR /api
 
 COPY . .
 
-RUN go mod download
+RUN go mod download -x
 
 RUN CGO_ENABLED=0 go build -v main.go
 
