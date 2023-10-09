@@ -1,5 +1,1 @@
-go.mod
-go.sum
 .idea
-docs
-model/transaction.go

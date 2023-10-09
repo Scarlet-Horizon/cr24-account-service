@@ -15,7 +15,6 @@ import (
 	"main/env"
 	"main/messaging"
 	"main/util"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -39,14 +38,12 @@ import (
 //	@license.url	https://www.gnu.org/licenses/gpl-3.0.html
 
 //	@securityDefinitions.apikey	JWT
-//@in header
-//@name Authorization
+//	@in							header
+//	@name						Authorization
 
 //	@host		localhost:8080
 //	@BasePath	/api/v1
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
 	err := env.Load("env/.env")
 	if err != nil {
 		log.Fatalf("failed to load env variables: %s", err)

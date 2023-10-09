@@ -1,0 +1,409 @@
+basePath: /api/v1
+consumes:
+- application/json
+definitions:
+  Account:
+    properties:
+      accountID:
+        description: Account UUID
+        example: 09130407-1f81-4ac5-be85-6557683462d0
+        type: string
+      amount:
+        description: Account amount
+        example: 50.5
+        type: number
+      closeDate:
+        description: The closing date for the account
+        example: "2022-12-21T14:40:20+01:00"
+        type: string
+      limit:
+        description: Account limit
+        example: 50
+        type: integer
+      openDate:
+        description: The opening date for the account
+        example: "2022-11-26T11:59:38+01:00"
+        type: string
+      transactions:
+        description: Account transactions
+        items:
+          $ref: '#/definitions/Transaction'
+        type: array
+      type:
+        description: 'Account type. One of the following: ''checking'', ''saving'''
+        enum:
+        - checking
+        - saving
+        example: checking
+        type: string
+      userID:
+        description: User UUID
+        example: 6204037c-30e6-408b-8aaa-dd8219860b4b
+        type: string
+    type: object
+  AccountRequest:
+    description: AccountRequest with account type
+    properties:
+      type:
+        description: 'Account type. One of the following: ''checking'', ''saving'''
+        enum:
+        - checking
+        - saving
+        example: checking
+        type: string
+    required:
+    - type
+    type: object
+  ErrorResponse:
+    properties:
+      error:
+        description: Error description.
+        example: invalid account id
+        type: string
+    type: object
+  MonetaryRequest:
+    description: MonetaryRequest with amount to deposit
+    properties:
+      amount:
+        description: Amount to deposit or withdraw
+        example: 45.12
+        minimum: 1
+        type: number
+    required:
+    - amount
+    type: object
+  Transaction:
+    properties:
+      amount:
+        description: Transaction amount
+        example: 17.24
+        type: number
+      date:
+        description: Transaction date
+        example: "2022-12-21T08:45:12+01:00"
+        type: string
+      id:
+        description: Transaction UUID
+        example: 4a5ed2e0-5cdb-4f9e-96e3-ecc372ba4f0c
+        type: string
+      recipientID:
+        description: Recipient account UUID
+        example: 8cca0453-8e84-4f3b-aa40-7fc9cd162a34
+        type: string
+      senderID:
+        description: Sender account UUID
+        example: 5d84ca00-c079-4577-9560-e1014086affe
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/TransactionType'
+        description: Transaction type
+    type: object
+  TransactionType:
+    properties:
+      id:
+        description: TransactionType ID
+        example: 1
+        type: integer
+      type:
+        description: TransactionType description
+        example: card-payment
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: David Slatinek
+    url: https://github.com/david-slatinek
+  description: API for account management for cr24 project
+  license:
+    name: GNU General Public License v3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+  termsOfService: http://swagger.io/terms/
+  title: cr24 Account API
+  version: "1.0"
+paths:
+  /account:
+    post:
+      consumes:
+      - application/json
+      description: Create a new account for user.
+      parameters:
+      - description: Account type
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/AccountRequest'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Account'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Create a new account for user
+      tags:
+      - account
+  /account/{accountID}:
+    delete:
+      description: Delete a specific account.
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountID
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete a specific account
+      tags:
+      - account
+    get:
+      description: Get a specific account.
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountID
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Account'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get a specific account
+      tags:
+      - account
+  /account/{accountID}/close:
+    patch:
+      description: Close a specific account.
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountID
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Close a specific account
+      tags:
+      - account
+  /account/{accountID}/deposit:
+    patch:
+      description: Deposit money to a specific account.
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountID
+        required: true
+        type: string
+      - description: Amount to deposit
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/MonetaryRequest'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Deposit money to a specific account
+      tags:
+      - account
+  /account/{accountID}/withdraw:
+    patch:
+      description: Withdraw money from a specific account.
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountID
+        required: true
+        type: string
+      - description: Amount to withdraw
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/MonetaryRequest'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Withdraw money from a specific account
+      tags:
+      - account
+  /accounts/{type}:
+    get:
+      description: Get accounts for a specific user.
+      parameters:
+      - description: 'What accounts to get: ''open'', ''closed'', ''all'''
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of Account's
+          schema:
+            items:
+              $ref: '#/definitions/Account'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get accounts for a specific user
+      tags:
+      - account
+  /accounts/{type}/transactions:
+    get:
+      description: Get all accounts with transactions for a given user.
+      parameters:
+      - description: 'What accounts to get: ''open'', ''closed'', ''all'''
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Account'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get all accounts with transactions for a given user
+      tags:
+      - account
+produces:
+- application/json
+schemes:
+- http
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -18,18 +18,19 @@ type AccountController struct {
 	DB *db.AccountDB
 }
 
-//	@description	Create new account for a user.
-//	@summary		Create new account for a user
-//	@accept			json
-//	@produce		json
-//	@tags			account
-//	@param			requestBody	body		request.AccountRequest	true	"Account type"
-//	@success		201			{object}	model.Account
-//	@failure		400			{object}	response.ErrorResponse
-//	@failure		500			{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account [POST]
+// Create godoc
+//	@Description	Create a new account for user.
+//	@Summary		Create a new account for user
+//	@Accept			json
+//	@Produce		json
+//	@Tags			account
+//	@Param			requestBody	body		request.AccountRequest	true	"Account type"
+//	@Success		201			{object}	model.Account
+//	@Failure		400			{object}	response.ErrorResponse
+//	@Failure		500			{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/account [POST]
 func (receiver AccountController) Create(context *gin.Context) {
 	var req request.AccountRequest
 	if err := context.ShouldBindJSON(&req); err != nil {
@@ -69,17 +70,18 @@ func (receiver AccountController) Create(context *gin.Context) {
 	context.JSON(http.StatusCreated, bankAccount)
 }
 
-//	@description	Get accounts for a specific user.
-//	@summary		Get accounts for a specific user
-//	@produce		json
-//	@tags			account
-//	@param			type	path		string			true	"What accounts to get: 'open', 'closed', 'all'"
-//	@success		200		{object}	[]model.Account	"An array of Account's"
-//	@failure		400		{object}	response.ErrorResponse
-//	@failure		500		{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/accounts/{type} [GET]
+// GetAll godoc
+//	@Description	Get accounts for a specific user.
+//	@Summary		Get accounts for a specific user
+//	@Produce		json
+//	@Tags			account
+//	@Param			type	path		string			true	"What accounts to get: 'open', 'closed', 'all'"
+//	@Success		200		{object}	[]model.Account	"An array of Account's"
+//	@Failure		400		{object}	response.ErrorResponse
+//	@Failure		500		{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/accounts/{type} [GET]
 func (receiver AccountController) GetAll(context *gin.Context) {
 	acc := receiver.get(context)
 	if acc != nil {
@@ -135,46 +137,49 @@ func (receiver AccountController) depositWithdraw(context *gin.Context, deposit 
 	context.Status(http.StatusNoContent)
 }
 
-//	@description	Deposit money to a specific account.
-//	@summary		Deposit money to a specific account
-//	@tags			account
-//	@param			accountID	path	string					true	"Account ID"
-//	@param			requestBody	body	request.MonetaryRequest	true	"Amount to deposit"
-//	@success		204			"No Content"
-//	@failure		400			{object}	response.ErrorResponse
-//	@failure		500			{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account/{accountID}/deposit [PATCH]
+// Deposit godoc
+//	@Description	Deposit money to a specific account.
+//	@Summary		Deposit money to a specific account
+//	@Tags			account
+//	@Param			accountID	path	string					true	"Account ID"
+//	@Param			requestBody	body	request.MonetaryRequest	true	"Amount to deposit"
+//	@Success		204			"No Content"
+//	@Failure		400			{object}	response.ErrorResponse
+//	@Failure		500			{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/account/{accountID}/deposit [PATCH]
 func (receiver AccountController) Deposit(context *gin.Context) {
 	receiver.depositWithdraw(context, true)
 }
 
-//	@description	Withdraw money from a specific account.
-//	@summary		Withdraw money from a specific account
-//	@tags			account
-//	@param			accountID	path	string					true	"Account ID"
-//	@param			requestBody	body	request.MonetaryRequest	true	"Amount to withdraw"
-//	@success		204			"No Content"
-//	@failure		400			{object}	response.ErrorResponse
-//	@failure		500			{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account/{accountID}/withdraw [PATCH]
+// Withdraw godoc
+//	@Description	Withdraw money from a specific account.
+//	@Summary		Withdraw money from a specific account
+//	@Tags			account
+//	@Param			accountID	path	string					true	"Account ID"
+//	@Param			requestBody	body	request.MonetaryRequest	true	"Amount to withdraw"
+//	@Success		204			"No Content"
+//	@Failure		400			{object}	response.ErrorResponse
+//	@Failure		500			{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/account/{accountID}/withdraw [PATCH]
 func (receiver AccountController) Withdraw(context *gin.Context) {
 	receiver.depositWithdraw(context, false)
 }
 
-//	@description	Close a specific account.
-//	@summary		Close a specific account
-//	@tags			account
-//	@param			accountID	path	string	true	"Account ID"
-//	@success		204			"No Content"
-//	@failure		400			{object}	response.ErrorResponse
-//	@failure		500			{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account/{accountID}/close [PATCH]
+// Close godoc
+//	@Description	Close a specific account.
+//	@Summary		Close a specific account
+//	@Tags			account
+//	@Param			accountID	path	string	true	"Account ID"
+//	@Success		204			"No Content"
+//	@Failure		400			{object}	response.ErrorResponse
+//	@Failure		500			{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/account/{accountID}/close [PATCH]
 func (receiver AccountController) Close(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
@@ -197,16 +202,17 @@ func (receiver AccountController) Close(context *gin.Context) {
 	context.Status(http.StatusNoContent)
 }
 
-//	@description	Delete a specific account.
-//	@summary		Delete a specific account
-//	@tags			account
-//	@param			accountID	path	string	true	"Account ID"
-//	@success		204			"No Content"
-//	@failure		400			{object}	response.ErrorResponse
-//	@failure		500			{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account/{accountID} [DELETE]
+// Delete godoc
+//	@Description	Delete a specific account.
+//	@Summary		Delete a specific account
+//	@Tags			account
+//	@Param			accountID	path	string	true	"Account ID"
+//	@Success		204			"No Content"
+//	@Failure		400			{object}	response.ErrorResponse
+//	@Failure		500			{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/account/{accountID} [DELETE]
 func (receiver AccountController) Delete(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
@@ -233,17 +239,18 @@ func (receiver AccountController) Delete(context *gin.Context) {
 	context.Status(http.StatusNoContent)
 }
 
-//	@description	Get a specific account.
-//	@summary		Get a specific account
-//	@produce		json
-//	@tags			account
-//	@param			accountID	path		string	true	"Account ID"
-//	@success		200			{object}	model.Account
-//	@failure		400			{object}	response.ErrorResponse
-//	@failure		500			{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/account/{accountID} [GET]
+// GetAccount godoc
+//	@Description	Get a specific account.
+//	@Summary		Get a specific account
+//	@Produce		json
+//	@Tags			account
+//	@Param			accountID	path		string	true	"Account ID"
+//	@Success		200			{object}	model.Account
+//	@Failure		400			{object}	response.ErrorResponse
+//	@Failure		500			{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/account/{accountID} [GET]
 func (receiver AccountController) GetAccount(context *gin.Context) {
 	accountID := context.Param("accountID")
 	if !util.IsValidUUID(accountID) {
@@ -294,17 +301,18 @@ func (receiver AccountController) get(context *gin.Context) []model.Account {
 	return acc
 }
 
-//	@description	Get all accounts with transactions for a given user.
-//	@summary		Get all accounts with transactions for a given user
-//	@produce		json
-//	@tags			account
-//	@param			type	path		string	true	"What accounts to get: 'open', 'closed', 'all'"
-//	@success		200		{object}	[]model.Account
-//	@failure		400		{object}	response.ErrorResponse
-//	@failure		500		{object}	response.ErrorResponse
-//	@security		JWT
-//	@param			Authorization	header	string	true	"Authorization"
-//	@router			/accounts/{type}/transactions [GET]
+// GetAllWithTransactions godoc
+//	@Description	Get all accounts with transactions for a given user.
+//	@Summary		Get all accounts with transactions for a given user
+//	@Produce		json
+//	@Tags			account
+//	@Param			type	path		string	true	"What accounts to get: 'open', 'closed', 'all'"
+//	@Success		200		{object}	[]model.Account
+//	@Failure		400		{object}	response.ErrorResponse
+//	@Failure		500		{object}	response.ErrorResponse
+//	@Security		JWT
+//	@Param			Authorization	header	string	true	"Authorization"
+//	@Router			/accounts/{type}/transactions [GET]
 func (receiver AccountController) GetAllWithTransactions(context *gin.Context) {
 	acc := receiver.get(context)
 	if acc == nil {

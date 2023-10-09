@@ -1,4 +1,4 @@
-FROM golang:1.19.3-alpine3.16 AS build
+FROM golang:1.21.2-alpine3.18 AS build
 
 WORKDIR /api
 
@@ -6,10 +6,10 @@ COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 go build main.go
+RUN CGO_ENABLED=0 go build -v main.go
 
 
-FROM alpine:3.17
+FROM alpine:3.18
 
 WORKDIR /api
 

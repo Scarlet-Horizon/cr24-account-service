@@ -1,12 +1,12 @@
 version: "3.9"
 
 services:
-  api:
+  account-service:
     build: .
     ports:
       - "8080:8080"
     networks:
-      - sipia_rv1_4
+      - account-service-network
     container_name: account-api-con
     hostname: account-api
     restart: on-failure
@@ -16,6 +16,6 @@ services:
           memory: 50M
 
 networks:
-  sipia_rv1_4:
-    name: sipia_rv1_4
+  account-service-network:
+    name: account-service-network
     driver: bridge

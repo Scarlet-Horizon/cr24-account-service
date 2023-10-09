@@ -156,14 +156,14 @@ func ValidateToken(context *gin.Context) {
 		return
 	}
 
-	values := strings.Split(token, "Bearer ")
-	if len(values) != 2 {
-		context.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "token is not set properly"})
-		context.Abort()
-		return
-	}
-
-	token = values[1]
+	//values := strings.Split(token, ": ")
+	//if len(values) != 2 {
+	//	context.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "token is not set properly"})
+	//	context.Abort()
+	//	return
+	//}
+	//
+	//token = values[1]
 
 	to, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

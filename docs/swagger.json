@@ -1,0 +1,613 @@
+{
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "API for account management for cr24 project",
+        "title": "cr24 Account API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "David Slatinek",
+            "url": "https://github.com/david-slatinek"
+        },
+        "license": {
+            "name": "GNU General Public License v3.0",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/account": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Create a new account for user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Create a new account for user",
+                "parameters": [
+                    {
+                        "description": "Account type",
+                        "name": "requestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AccountRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Account"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{accountID}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get a specific account.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get a specific account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "accountID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Account"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Delete a specific account.",
+                "tags": [
+                    "account"
+                ],
+                "summary": "Delete a specific account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "accountID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{accountID}/close": {
+            "patch": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Close a specific account.",
+                "tags": [
+                    "account"
+                ],
+                "summary": "Close a specific account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "accountID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{accountID}/deposit": {
+            "patch": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Deposit money to a specific account.",
+                "tags": [
+                    "account"
+                ],
+                "summary": "Deposit money to a specific account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "accountID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Amount to deposit",
+                        "name": "requestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MonetaryRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{accountID}/withdraw": {
+            "patch": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Withdraw money from a specific account.",
+                "tags": [
+                    "account"
+                ],
+                "summary": "Withdraw money from a specific account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "accountID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Amount to withdraw",
+                        "name": "requestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MonetaryRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{type}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get accounts for a specific user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get accounts for a specific user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "What accounts to get: 'open', 'closed', 'all'",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of Account's",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Account"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{type}/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get all accounts with transactions for a given user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get all accounts with transactions for a given user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "What accounts to get: 'open', 'closed', 'all'",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Account"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Account": {
+            "type": "object",
+            "properties": {
+                "accountID": {
+                    "description": "Account UUID",
+                    "type": "string",
+                    "example": "09130407-1f81-4ac5-be85-6557683462d0"
+                },
+                "amount": {
+                    "description": "Account amount",
+                    "type": "number",
+                    "example": 50.5
+                },
+                "closeDate": {
+                    "description": "The closing date for the account",
+                    "type": "string",
+                    "example": "2022-12-21T14:40:20+01:00"
+                },
+                "limit": {
+                    "description": "Account limit",
+                    "type": "integer",
+                    "example": 50
+                },
+                "openDate": {
+                    "description": "The opening date for the account",
+                    "type": "string",
+                    "example": "2022-11-26T11:59:38+01:00"
+                },
+                "transactions": {
+                    "description": "Account transactions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Transaction"
+                    }
+                },
+                "type": {
+                    "description": "Account type. One of the following: 'checking', 'saving'",
+                    "type": "string",
+                    "enum": [
+                        "checking",
+                        "saving"
+                    ],
+                    "example": "checking"
+                },
+                "userID": {
+                    "description": "User UUID",
+                    "type": "string",
+                    "example": "6204037c-30e6-408b-8aaa-dd8219860b4b"
+                }
+            }
+        },
+        "AccountRequest": {
+            "description": "AccountRequest with account type",
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "description": "Account type. One of the following: 'checking', 'saving'",
+                    "type": "string",
+                    "enum": [
+                        "checking",
+                        "saving"
+                    ],
+                    "example": "checking"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Error description.",
+                    "type": "string",
+                    "example": "invalid account id"
+                }
+            }
+        },
+        "MonetaryRequest": {
+            "description": "MonetaryRequest with amount to deposit",
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "Amount to deposit or withdraw",
+                    "type": "number",
+                    "minimum": 1,
+                    "example": 45.12
+                }
+            }
+        },
+        "Transaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Transaction amount",
+                    "type": "number",
+                    "example": 17.24
+                },
+                "date": {
+                    "description": "Transaction date",
+                    "type": "string",
+                    "example": "2022-12-21T08:45:12+01:00"
+                },
+                "id": {
+                    "description": "Transaction UUID",
+                    "type": "string",
+                    "example": "4a5ed2e0-5cdb-4f9e-96e3-ecc372ba4f0c"
+                },
+                "recipientID": {
+                    "description": "Recipient account UUID",
+                    "type": "string",
+                    "example": "8cca0453-8e84-4f3b-aa40-7fc9cd162a34"
+                },
+                "senderID": {
+                    "description": "Sender account UUID",
+                    "type": "string",
+                    "example": "5d84ca00-c079-4577-9560-e1014086affe"
+                },
+                "type": {
+                    "description": "Transaction type",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/TransactionType"
+                        }
+                    ]
+                }
+            }
+        },
+        "TransactionType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "TransactionType ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "type": {
+                    "description": "TransactionType description",
+                    "type": "string",
+                    "example": "card-payment"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
