@@ -19,3 +19,4 @@ networks:
   account-service-network:
     name: account-service-network
     driver: bridge
+    external: true

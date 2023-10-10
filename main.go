@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -41,8 +43,8 @@ import (
 //	@in							header
 //	@name						Authorization
 
-//	@host		localhost:8080
-//	@BasePath	/api/v1
+// @host		localhost:8080
+// @BasePath	/api/v1
 func main() {
 	err := env.Load("env/.env")
 	if err != nil {
@@ -52,7 +54,19 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(os.Getenv("REGION")))
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(os.Getenv("REGION")),
+		config.WithEndpointResolver(aws.EndpointResolverFunc(
+			func(service, region string) (aws.Endpoint, error) {
+				return aws.Endpoint{URL: "http://dynamodb:8000"}, nil
+			})),
+		config.WithCredentialsProvider(credentials.StaticCredentialsProvider{
+			Value: aws.Credentials{
+				AccessKeyID:     os.Getenv("AWS_ACCESS_KEY_ID"),
+				SecretAccessKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
+			},
+		}),
+	)
 	if err != nil {
 		log.Fatalf("failed to load SDK config, %s", err)
 	}

@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  dynamodb:
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb
+    hostname: dynamodb
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    user: root
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${REGION}
+    networks:
+      - account-service-network
+    env_file:
+      - .env
+
+  dynamodb-init:
+    depends_on:
+      - dynamodb
+    image: amazon/aws-cli
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${REGION}
+    networks:
+      - account-service-network
+    command: >-
+      dynamodb create-table
+          --table-name Account
+          --attribute-definitions
+              AttributeName=PK,AttributeType=S
+              AttributeName=SK,AttributeType=S
+          --key-schema
+              AttributeName=PK,KeyType=HASH
+              AttributeName=SK,KeyType=RANGE
+          --provisioned-throughput
+              ReadCapacityUnits=1,WriteCapacityUnits=1
+          --endpoint-url http://dynamodb:8000 --region eu-central-1
+    env_file:
+      - .env
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: "http://dynamodb:8000"
+      AWS_REGION: ${REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - dynamodb
+    env_file:
+      - .env
+    networks:
+      - account-service-network
+
+networks:
+  account-service-network:
+    name: account-service-network
+    driver: bridge
