@@ -69,10 +69,19 @@ or download the repository.
 Then run
 
 ```shell
+cd db
 docker-compose up
 ```
 
-in the root directory of the project.
+to start the database.
+
+Then open another terminal and run
+
+```shell
+docker-compose up
+```
+
+in the root directory of the repository to start the API.
 
 ## Usage
 
