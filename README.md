@@ -24,16 +24,20 @@ We used **RabbitMQ** for log management and **Swagger** for documentation.
     - [Table of Contents](#table-of-contents)
     - [Prerequisites](#prerequisites)
     - [How to run](#how-to-run)
-        - [Run with Docker (preferred)](#run-with-docker-preferred)
-        - [Run natively](#run-natively)
     - [Usage](#usage)
     - [Contributor](#contributor)
 
 ## Prerequisites
 
-Go to the [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) website and create a table named `Accounts`. Then go to
-the [Amazon IAM](https://aws.amazon.com/iam/) website and create a user with the following permission:
-`AmazonDynamoDBFullAccess`. Save the credentials for the user or download the `credentials.csv` file.
+Go to the `db/` directory and create a `.env` file. Add the following environment variables:
+
+```env
+AWS_ACCESS_KEY_ID = <your_aws_access_key_id>
+AWS_SECRET_ACCESS_KEY = <your_aws_secret_access_key>
+REGION = <your_aws_region>
+```
+
+All these variables can be set to any value. They are only used to create the database locally.
 
 Create a `.env` file in the `env/` directory and add the following environment variables:
 
@@ -47,14 +51,12 @@ AMQP_URL = <your_amqp_url>
 EXCHANGE_QUEUE_NAME = <your_exchange_queue_name>
 ```
 
-`AMQP_URL` and `EXCHANGE_QUEUE_NAME` are optional. If you do not specify them, the logs will not be sent to the queue.
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_REGION` must the same as in the `db/.env` file. `AMQP_URL`
+and `EXCHANGE_QUEUE_NAME` are optional. If you do not specify them, the logs will not be sent to the queue.
 
 ## How to run
 
 Firstly, you need to install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/).
-If you wish to run the code without Docker (natively), you need to install [Go](https://golang.org/).
-
-It is recommended to run the code with Docker - see [Run with Docker](#run-with-docker-preferred).
 
 Then run:
 
@@ -64,22 +66,10 @@ git clone
 
 or download the repository.
 
-### Run with Docker (preferred)
-
-Run:
+Then run
 
 ```shell
 docker-compose up
-```
-
-in the root directory of the project.
-
-### Run natively
-
-Run:
-
-```shell
-go run main.go
 ```
 
 in the root directory of the project.
