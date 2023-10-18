@@ -85,7 +85,7 @@ in the root directory of the repository to start the API.
 
 ## Usage
 
-The API is documented with Swagger. You can access the documentation at `http://localhost:8080/swagger/index.html`.
+The API is documented with Swagger. You can access the documentation at `http://localhost:8080/docs/index.html`.
 
 The API is protected with JWT. To get the token, you need to generate it. You can do this online
 at [jwt.io](https://jwt.io/).
