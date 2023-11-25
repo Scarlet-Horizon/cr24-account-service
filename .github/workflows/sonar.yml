@@ -1,4 +1,4 @@
-name: Test with Sonar
+name: Static Code Analysis with SonarCloud
 
 on:
   push:
