@@ -19,6 +19,7 @@ type AccountController struct {
 }
 
 // Create godoc
+//
 //	@Description	Create a new account for user.
 //	@Summary		Create a new account for user
 //	@Accept			json
@@ -66,11 +67,12 @@ func (receiver AccountController) Create(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	util.UploadAccount(bankAccount, context)
+	//util.UploadAccount(bankAccount, context)
 	context.JSON(http.StatusCreated, bankAccount)
 }
 
 // GetAll godoc
+//
 //	@Description	Get accounts for a specific user.
 //	@Summary		Get accounts for a specific user
 //	@Produce		json
@@ -138,6 +140,7 @@ func (receiver AccountController) depositWithdraw(context *gin.Context, deposit 
 }
 
 // Deposit godoc
+//
 //	@Description	Deposit money to a specific account.
 //	@Summary		Deposit money to a specific account
 //	@Tags			account
@@ -154,6 +157,7 @@ func (receiver AccountController) Deposit(context *gin.Context) {
 }
 
 // Withdraw godoc
+//
 //	@Description	Withdraw money from a specific account.
 //	@Summary		Withdraw money from a specific account
 //	@Tags			account
@@ -170,6 +174,7 @@ func (receiver AccountController) Withdraw(context *gin.Context) {
 }
 
 // Close godoc
+//
 //	@Description	Close a specific account.
 //	@Summary		Close a specific account
 //	@Tags			account
@@ -203,6 +208,7 @@ func (receiver AccountController) Close(context *gin.Context) {
 }
 
 // Delete godoc
+//
 //	@Description	Delete a specific account.
 //	@Summary		Delete a specific account
 //	@Tags			account
@@ -240,6 +246,7 @@ func (receiver AccountController) Delete(context *gin.Context) {
 }
 
 // GetAccount godoc
+//
 //	@Description	Get a specific account.
 //	@Summary		Get a specific account
 //	@Produce		json
@@ -302,6 +309,7 @@ func (receiver AccountController) get(context *gin.Context) []model.Account {
 }
 
 // GetAllWithTransactions godoc
+//
 //	@Description	Get all accounts with transactions for a given user.
 //	@Summary		Get all accounts with transactions for a given user
 //	@Produce		json

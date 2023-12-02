@@ -92,7 +92,8 @@ func main() {
 
 	router.Use(util.CORS)
 
-	api := router.Group("api/v1").Use(util.ValidateToken).Use(util.UploadStat)
+	//api := router.Group("api/v1").Use(util.ValidateToken).Use(util.UploadStat)
+	api := router.Group("api/v1").Use(util.ValidateToken)
 	{
 		api.POST("/account", accountController.Create)
 
