@@ -1,5 +1,15 @@
 import http from "k6/http";
 import {check, group} from "k6";
+import {
+    BASE_URL,
+    closeAccount,
+    deposit,
+    getAccount,
+    getAllAccounts,
+    getToken,
+    requestConfigWithTag,
+    withdraw
+} from "./helpers.js";
 
 const ITERATIONS = 10;
 
@@ -14,37 +24,15 @@ export const options = {
 };
 
 
-const BASE_URL = "http://localhost:8080/api/v1";
 let token = ""
 let accountId = ""
-
-const requestConfigWithTag = (tag) => ({
-    headers: {
-        Content_Type: "application/json",
-        Authorization: `Bearer ${token}`,
-    },
-
-    tags: Object.assign(
-        {name: tag},
-    ),
-});
-
-function getToken() {
-    const res = http.get(`${BASE_URL}/login`);
-    check(res, {
-        "status is 200": (r) => r.status === 200,
-        "token is present": (r) => r.json("token") !== "",
-        "response is in json": (r) => r.headers["Content-Type"] === "application/json; charset=utf-8",
-    });
-    token = res.json("token");
-}
 
 function createAccount() {
     const res = http.post(`${BASE_URL}/account`,
         JSON.stringify({
             type: "checking",
         }),
-        requestConfigWithTag("createAccount"),
+        requestConfigWithTag("createAccount", token),
     );
 
     check(res, {
@@ -55,82 +43,10 @@ function createAccount() {
     accountId = res.json("accountID");
 }
 
-function getAllAccounts() {
-    const res = http.get(`${BASE_URL}/accounts/all`, requestConfigWithTag("getAllAccounts"));
-
-    check(res, {
-        "status is 200": (r) => r.status === 200,
-        "response is in json": (r) => r.headers["Content-Type"] === "application/json; charset=utf-8",
-    });
-}
-
-function getAccount() {
-    const res = http.get(`${BASE_URL}/account/${accountId}`, requestConfigWithTag("getAccount"));
-
-    check(res, {
-        "status is 200": (r) => r.status === 200,
-        "response is in json": (r) => r.headers["Content-Type"] === "application/json; charset=utf-8",
-    });
-}
-
-function randomFloat(min, max) {
-    return +(Math.random() * (max - min + 1) + min).toFixed(2);
-}
-
-function deposit() {
-    const res = http.patch(`${BASE_URL}/account/${accountId}/deposit`,
-        JSON.stringify({
-            amount: randomFloat(90, 200),
-        }),
-        requestConfigWithTag("deposit"),
-    );
-
-    const ok = check(res, {
-        "status is 204": (r) => r.status === 204,
-    });
-
-    if (!ok) {
-        console.log(`deposit failed: ${res.status} ${res.body}`);
-    }
-    return ok;
-}
-
-function withdraw() {
-    const res = http.patch(`${BASE_URL}/account/${accountId}/withdraw`,
-        JSON.stringify({
-            amount: randomFloat(20, 80),
-        }),
-        requestConfigWithTag("withdraw"),
-    );
-
-    const ok = check(res, {
-        "status is 204": (r) => r.status === 204,
-    });
-
-    if (!ok) {
-        console.log(`withdraw failed: ${res.status} ${res.body}`);
-    }
-    return ok;
-}
-
-function closeAccount() {
-    const res = http.patch(`${BASE_URL}/account/${accountId}/close`, requestConfigWithTag("closeAccount"),
-        requestConfigWithTag("withdraw"));
-
-    const ok = check(res, {
-        "status is 204": (r) => r.status === 204,
-    });
-
-    if (!ok) {
-        console.log(`closeAccount failed: ${res.status} ${res.body}`);
-    }
-    return ok;
-}
-
 export default () => {
     if (__ITER === 0) {
         group("get token", () => {
-            getToken();
+            token = getToken();
         });
 
         group("create account", () => {
@@ -139,26 +55,26 @@ export default () => {
     }
 
     group("get all accounts", () => {
-        getAllAccounts();
+        getAllAccounts(token);
     });
 
     group("get account", () => {
-        getAccount();
+        getAccount(accountId, token);
     })
 
     group("deposit", () => {
-        if (!deposit()) {
+        if (!deposit(accountId, token)) {
             return;
         }
     })
 
     group("withdraw", () => {
-        withdraw();
+        withdraw(accountId, token);
     })
 
     if (__ITER === ITERATIONS - 1) {
         group("close account", () => {
-            closeAccount();
+            closeAccount(accountId, token);
         });
     }
 }
