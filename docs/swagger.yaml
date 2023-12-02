@@ -72,6 +72,12 @@ definitions:
     required:
     - amount
     type: object
+  Token:
+    properties:
+      token:
+        description: Token
+        type: string
+    type: object
   Transaction:
     properties:
       amount:
@@ -397,6 +403,25 @@ paths:
       summary: Get all accounts with transactions for a given user
       tags:
       - account
+  /login:
+    get:
+      description: Get a random token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token
+          schema:
+            items:
+              $ref: '#/definitions/Token'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get a random token.
+      tags:
+      - auth
 produces:
 - application/json
 schemes:

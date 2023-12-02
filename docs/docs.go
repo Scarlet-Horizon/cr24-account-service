@@ -455,6 +455,35 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/login": {
+            "get": {
+                "description": "Get a random token.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get a random token.",
+                "responses": {
+                    "200": {
+                        "description": "Token",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Token"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -549,6 +578,15 @@ const docTemplate = `{
                     "type": "number",
                     "minimum": 1,
                     "example": 45.12
+                }
+            }
+        },
+        "Token": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "Token",
+                    "type": "string"
                 }
             }
         },

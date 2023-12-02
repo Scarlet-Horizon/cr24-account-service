@@ -91,6 +91,7 @@ func main() {
 	}
 
 	router.Use(util.CORS)
+
 	api := router.Group("api/v1").Use(util.ValidateToken).Use(util.UploadStat)
 	{
 		api.POST("/account", accountController.Create)
@@ -105,6 +106,7 @@ func main() {
 
 		api.DELETE("/account/:accountID", accountController.Delete)
 	}
+	router.GET("api/v1/login", util.RandomToken)
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{

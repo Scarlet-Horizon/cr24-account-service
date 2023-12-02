@@ -156,14 +156,13 @@ func ValidateToken(context *gin.Context) {
 		return
 	}
 
-	//values := strings.Split(token, ": ")
-	//if len(values) != 2 {
-	//	context.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "token is not set properly"})
-	//	context.Abort()
-	//	return
-	//}
-	//
-	//token = values[1]
+	values := strings.Split(token, "Bearer ")
+	if len(values) != 2 {
+		context.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: "token is not set properly"})
+		context.Abort()
+		return
+	}
+	token = values[1]
 
 	to, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -216,6 +215,32 @@ func ValidateToken(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "invalid token"})
+}
+
+// RandomToken godoc
+//
+//	@Description	Get a random token.
+//	@Summary		Get a random token.
+//	@Produce		json
+//	@Tags			auth
+//	@Success		200	{object}	[]model.Token	"Token"
+//	@Failure		500	{object}	response.ErrorResponse
+//	@Router			/login [GET]
+func RandomToken(context *gin.Context) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512,
+		jwt.MapClaims{
+			"sub": uuid.New().String(),
+			"iat": time.Now().Unix(),
+			"exp": time.Now().Add(time.Hour * 24).Unix(),
+		},
+	)
+
+	s, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, model.Token{Token: s})
 }
 
 func CORS(context *gin.Context) {
