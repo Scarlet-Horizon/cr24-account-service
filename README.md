@@ -9,6 +9,7 @@
     <img alt="RabbitMQ" src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=RabbitMQ&logoColor=white"/>
     <img alt="Amazon DynamoDB" src="https://img.shields.io/badge/Amazon_DynamoDB-4053D6?style=for-the-badge&logo=Amazon-DynamoDB&logoColor=white"/>
     <img alt="Swagger" src="https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=Swagger&logoColor=white"/>
+    <img alt="k6" src="https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&logo=k6&logoColor=white"/>
 </div>
 
 API for managing bank accounts. The API allows you to create, read, update and delete bank accounts.
