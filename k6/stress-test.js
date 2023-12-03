@@ -18,12 +18,12 @@ export const options = {
             executor: "ramping-arrival-rate",
             stages: [
                 {target: 100, duration: "10s"},
-                {target: 100, duration: "1m"},
+                {target: 100, duration: "20s"},
                 {target: 500, duration: "1m"},
-                {target: 500, duration: "1m"},
-                {target: 0, duration: "30s"},
+                {target: 500, duration: "40s"},
+                {target: 0, duration: "20s"},
             ],
-            preAllocatedVUs: 200,
+            preAllocatedVUs: 230,
         },
     },
 };
@@ -88,13 +88,8 @@ export default () => {
     })
 
     group("05. Deposit", () => {
-        if (!deposit(id1, token)) {
-            return;
-        }
-
-        if (!deposit(id2, token)) {
-            return;
-        }
+        deposit(id1, token);
+        deposit(id2, token);
     })
 
     group("06. Withdraw", () => {

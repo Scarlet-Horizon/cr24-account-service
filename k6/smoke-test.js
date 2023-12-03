@@ -21,6 +21,9 @@ export const options = {
             iterations: ITERATIONS,
         },
     },
+    thresholds: {
+        "http_req_duration{scenario:smoke_test}": ["avg<50", "p(95)<100"],
+    }
 };
 
 
@@ -63,9 +66,7 @@ export default () => {
     })
 
     group("deposit", () => {
-        if (!deposit(accountId, token)) {
-            return;
-        }
+        deposit(accountId, token);
     })
 
     group("withdraw", () => {
