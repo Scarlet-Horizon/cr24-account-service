@@ -78,11 +78,11 @@ export default () => {
         return [id1, id2];
     });
 
-    group("03. get all accounts", () => {
+    group("03. Get all accounts", () => {
         getAllAccounts(token);
     });
 
-    group("04. Get account", () => {
+    group("04. Get accounts", () => {
         getAccount(id1, token);
         getAccount(id2, token);
     })
