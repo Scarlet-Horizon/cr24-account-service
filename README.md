@@ -107,6 +107,10 @@ The JWT token must be sent in the `Authorization` header in the following format
 Authorization <your_jwt_token>
 ```
 
+## Testing documentation
+
+For testing documentation, see [https://github.com/david-slatinek/cr24-account-service/wiki](https://github.com/david-slatinek/cr24-account-service/wiki).
+
 ## Contributor
 
 <table>
